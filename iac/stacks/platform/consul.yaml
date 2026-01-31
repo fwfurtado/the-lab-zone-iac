@@ -1,0 +1,64 @@
+# yaml-language-server: $schema=https://atmos.tools/schemas/atmos/atmos-manifest/1.0/atmos-manifest.json
+
+import:
+  - catalog/_default.yaml
+
+vars:
+  stage: platform
+
+terraform:
+  backend_type: local
+  backend:
+    local:
+      path: "terraform.tfstate"
+
+
+components:
+  terraform:
+    consul:
+      settings:
+        apply_auto_approve: false
+      vars:
+        consul:
+          datacenter: "the-lab"
+          data_dir: "/consul/data"
+          servers:
+            - id: 101
+              hostname: "consul-server-01"
+              description: "Consul server 1"
+              ip_cidr: "192.168.40.11/24"
+            - id: 102
+              hostname: "consul-server-02"
+              description: "Consul server 2"
+              ip_cidr: "192.168.40.12/24"
+            - id: 103
+              hostname: "consul-server-03"
+              description: "Consul server 3"
+              ip_cidr: "192.168.40.13/24"
+          esm:
+            - id: 201
+              hostname: "consul-esm"
+              description: "Consul ESM"
+              ip_cidr: "192.168.40.21/24"
+        container_server:
+          image:
+            repository: "hashicorp/consul"
+            tag: "1.22"
+          resources:
+            cpu: 1
+            memory: 1024
+            disk:
+              size: 5
+          mount_points:
+            - volume: "ssd-standard"
+              path: "/consul/data"
+              size: "5G"
+        container_esm:
+          image:
+            repository: "hashicorp/consul-esm"
+            tag: "0.9"
+          resources:
+            cpu: 1
+            memory: 1024
+            disk:
+              size: 5
