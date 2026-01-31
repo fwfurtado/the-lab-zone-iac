@@ -1,0 +1,36 @@
+base_path: "."
+
+components:
+  terraform:
+    base_path: "components/terraform/components"
+    deploy_run_init: true
+    auto_generate_backend_file: false
+
+stacks:
+  base_path: "stacks"
+  included_paths:
+    - "**/*"
+  excluded_paths:
+    - "catalog/**/*"
+  name_pattern: "{stage}-{component}"
+
+logs:
+  file: "/dev/stderr"
+  level: Info
+
+# # Integrations
+# integrations: {}
+
+# # Schemas para validação (futuro)
+# schemas:
+#   jsonschema:
+#     base_path: "schemas/jsonschema"
+#   opa:
+#     base_path: "schemas/opa"
+
+# # Comandos customizados
+# commands: []
+
+# # Workflows para automação
+# workflows:
+#   base_path: "workflows"
