@@ -1,0 +1,49 @@
+# yaml-language-server: $schema=https://atmos.tools/schemas/atmos/atmos-manifest/1.0/atmos-manifest.json
+
+import:
+  - catalog/_default.yaml
+
+vars:
+  stage: platform
+
+terraform:
+  backend_type: local
+  backend:
+    local:
+      path: "terraform.tfstate"
+
+
+components:
+  terraform:
+    vault:
+      settings:
+        apply_auto_approve: false
+      vars:
+        vault:
+          servers:
+            - id: 301
+              hostname: "vault-server-01"
+              description: "Consul server 1"
+              ip_cidr: "192.168.40.31/24"
+            - id: 302
+              hostname: "vault-server-02"
+              description: "Vault server 2"
+              ip_cidr: "192.168.40.32/24"
+        container_server:
+          image:
+            repository: "hashicorp/vault"
+            tag: "1.21"
+          resources:
+            cpu: 1
+            memory: 1024
+            disk:
+              size: 5
+        container_unsealer:
+          image:
+            repository: "hashicorp/vault"
+            tag: "1.21"
+          resources:
+            cpu: 1
+            memory: 1024
+            disk:
+              size: 5
