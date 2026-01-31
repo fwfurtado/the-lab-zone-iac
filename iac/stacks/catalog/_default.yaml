@@ -1,0 +1,20 @@
+# stacks/catalog/_defaults.yaml
+
+vars:
+  defaults:
+    image:
+      storage_id: "local"
+      registry: "docker.io"
+      tag: "latest"
+    network:
+      interface_name: "eth0"
+      bridge: "vmbr0"
+      gateway: "192.168.40.1"
+      dns_servers: []
+    environment_variables: {}
+    disk:
+      storage_id: "local-lvm"
+    features:
+      nesting: true
+      unprivileged: true
+    files: {}
