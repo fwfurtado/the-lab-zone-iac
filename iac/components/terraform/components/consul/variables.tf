@@ -17,3 +17,9 @@ variable "consul" {
   })
   description = "The consul configurations"
 }
+
+
+variable "consul_esm_token" {
+  type = string
+  description = "The token for the Consul ESM"
+}

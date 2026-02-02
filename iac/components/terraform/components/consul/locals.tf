@@ -22,12 +22,21 @@ locals {
     client_addr      = "0.0.0.0",
     retry_join       = [for server in var.consul.servers : split("/", server.ip_cidr)[0]],
     ui_config        = { enabled = true }
+
+    acl = {
+      enabled                  = true
+      default_policy           = "deny"
+      enable_token_persistence = true
+      down_policy              = "extend-cache"
+    }
   }
 
   ems_config = {
 
     log_level = "debug"
     log_json  = true
+
+    token = var.consul_esm_token
 
     consul_service     = "consul-esm"
     consul_service_tag = "esm"
