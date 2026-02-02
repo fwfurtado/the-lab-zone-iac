@@ -7,3 +7,4 @@ export TF_VAR_proxmox_node_name=proxmox
 export TF_VAR_proxmox_host={{ op://homelab/Proxmox Terraform ssh/URL}}
 export TF_VAR_proxmox_ssh_username={{ op://homelab/Proxmox Terraform ssh/username }}
 export TF_VAR_proxmox_ssh_agent=true
+export TF_TOKEN_app_terraform_io={{ op://development/Terraform/api token/homelab-cli }}

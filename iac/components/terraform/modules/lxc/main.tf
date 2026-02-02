@@ -63,6 +63,15 @@ resource "proxmox_virtual_environment_container" "this" {
   }
 
   unprivileged = local.container.features.unprivileged
+
+  lifecycle {
+    ignore_changes = [
+      console,
+      operating_system[0].template_file_id,
+      network_interface[0].mac_address,
+      environment_variables,
+    ]
+  }
 }
 
 

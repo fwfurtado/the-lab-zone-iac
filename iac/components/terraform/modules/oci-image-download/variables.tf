@@ -44,7 +44,7 @@ variable "upload_timeout" {
 variable "overwrite" {
   type        = bool
   description = "The overwrite of the image"
-  default = true
+  default = false
 }
 
 variable "overwrite_unmanaged" {
