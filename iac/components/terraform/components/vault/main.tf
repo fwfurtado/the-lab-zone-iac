@@ -1,38 +1,8 @@
-module "consul-cluster" {
-  source   = "../../modules/lxc"
-
-  for_each = { for server in var.consul.servers : server.id => server }
-
-  proxmox_node_name    = var.proxmox_node_name
-  proxmox_host         = var.proxmox_host
-  proxmox_ssh_username = var.proxmox_ssh_username
-  proxmox_ssh_agent    = var.proxmox_ssh_agent
-
-  defaults = var.defaults
-
-  container = merge(var.container_server, {
-    id       = each.value.id,
-    hostname = each.value.hostname,
-    description = each.value.description,
-    network = {
-      ip_cidr = each.value.ip_cidr,
-    },
-
-    entrypoint = "docker-entrypoint.sh agent -config-file=/consul/config/consul.json"
-
-    files = {
-      "/consul/config/consul.json" = jsonencode(merge(local.server_config, { node_name = each.value.hostname }))
-    }
-  })
-}
-
-
-module "consul-esm" {
+module "vault" {
+  depends_on = [consul_acl_token.vault]
   source     = "../../modules/lxc"
 
-  depends_on = [module.consul-cluster]
-
-  for_each   = { for esm in var.consul.esm : esm.id => esm }
+  for_each = { for server in var.vault.servers : server.id => server }
 
   proxmox_node_name    = var.proxmox_node_name
   proxmox_host         = var.proxmox_host
@@ -41,28 +11,36 @@ module "consul-esm" {
 
   defaults = var.defaults
 
-  container = merge(var.container_esm, {
-    id       = each.value.id,
-    hostname = each.value.hostname,
-    description = each.value.description,
-    network = {
-      ip_cidr = each.value.ip_cidr,
-    },
+  container = merge(var.container,
+    {
+      id          = each.value.id,
+      hostname    = each.value.hostname,
+      description = each.value.description,
+      network = {
+        ip_cidr = each.value.ip_cidr,
+      },
 
-    entrypoint = "/bin/consul-esm -config-file=/consul/config/ems.json"
+      entrypoint = "docker-entrypoint.sh server"
 
-    files = {
-      "/consul/config/ems.json" = jsonencode(merge(local.ems_config, { node_name = each.value.hostname }))
+      files = {
+        "/vault/config/vault.json" = jsonencode(
+          merge(local.config,
+            {
+              api_addr     = "http://${split("/", each.value.ip_cidr)[0]}:8200"
+              cluster_addr = "http://${split("/", each.value.ip_cidr)[0]}:8201"
+              storage = {
+                "consul" = {
+                  service      = "vault"
+                  service_tags = "active,standby"
+                  path         = "vault/"
+                  address      = nonsensitive(data.tfe_outputs.consul.values.connections.leader.address)
+                  token        = nonsensitive(data.consul_acl_token_secret_id.this.secret_id)
+                }
+              }
+            }
+          )
+        )
+      }
     }
-  })
-}
-
-
-resource "consul_node" "consul-esm-registration" {
-  depends_on = [module.consul-esm]
-
-  for_each = { for esm in var.consul.esm : esm.id => esm }
-
-  name    = each.value.hostname
-  address = split("/", each.value.ip_cidr)[0]
+  )
 }

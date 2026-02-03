@@ -1,6 +1,7 @@
 # stacks/catalog/_defaults.yaml
 
 vars:
+  consul_datacenter: "the-lab"
   defaults:
     image:
       storage_id: "local"

@@ -23,14 +23,14 @@ variable "proxmox_ssh_agent" {
   description = "Whether to use the SSH agent"
 }
 
-variable "container_server" {
-  type = any
-  description = "The container configuration for the Consul server - see modules/lxc/variables.tf for more details"
+variable "consul_datacenter" {
+  type = string
+  description = "The datacenter of the Consul cluster"
 }
 
-variable "container_esm" {
+variable "container" {
   type = any
-  description = "The container configuration for the Consul ESM - see modules/lxc/variables.tf for more details"
+  description = "The container configuration for the Vault server - see modules/lxc/variables.tf for more details"
 }
 
 variable "defaults" {

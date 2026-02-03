@@ -9,9 +9,14 @@ export TF_VAR_proxmox_ssh_username={{ op://homelab/Proxmox Terraform ssh/usernam
 export TF_VAR_proxmox_ssh_agent=true
 
 export TF_TOKEN_app_terraform_io={{ op://development/Terraform/api token/homelab-cli }}
+export TFE_TOKEN={{ op://development/Terraform/api token/homelab-cli }}
 
 export TF_VAR_consul_esm_token={{ op://homelab/Consul Server/acl esm/secret-id }}
 
+export TF_VAR_consul_datacenter="the-lab"
 export CONSUL_HTTP_ADDR={{ op://homelab/Consul Server/address }}
 export CONSUL_HTTP_SSL=false
 export CONSUL_HTTP_TOKEN={{ op://homelab/Consul Server/acl management/secret-id }}
+
+export TF_VAR_ghcr_username={{ op://development/Github Package Token/username }}
+export TF_VAR_ghcr_password={{ op://development/Github Package Token/credential }}

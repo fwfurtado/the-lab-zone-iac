@@ -6,13 +6,6 @@ import:
 vars:
   stage: platform
 
-terraform:
-  backend_type: local
-  backend:
-    local:
-      path: "terraform.tfstate"
-
-
 components:
   terraform:
     vault:
@@ -29,16 +22,11 @@ components:
               hostname: "vault-server-02"
               description: "Vault server 2"
               ip_cidr: "192.168.40.32/24"
-        container_server:
-          image:
-            repository: "hashicorp/vault"
-            tag: "1.21"
-          resources:
-            cpu: 1
-            memory: 1024
-            disk:
-              size: 5
-        container_unsealer:
+            - id: 303
+              hostname: "vault-server-03"
+              description: "Vault server 3"
+              ip_cidr: "192.168.40.33/24"
+        container:
           image:
             repository: "hashicorp/vault"
             tag: "1.21"

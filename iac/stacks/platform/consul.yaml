@@ -6,12 +6,6 @@ import:
 vars:
   stage: platform
 
-terraform:
-  backend_type: local
-  backend:
-    local:
-      path: "terraform.tfstate"
-
 
 components:
   terraform:
