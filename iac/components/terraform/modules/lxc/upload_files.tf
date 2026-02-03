@@ -1,6 +1,6 @@
 resource "null_resource" "files" {
   depends_on = [proxmox_virtual_environment_container.this]
-  for_each   = local.container.files
+  for_each   = nonsensitive(local.container.files)
 
   triggers = {
     files = sha256(jsonencode(local.container.files))
