@@ -20,7 +20,30 @@ module "this" {
         ip_cidr = each.value.ip_cidr,
       },
 
-      entrypoint = "/cockroach/cockroach.sh start --insecure --http-addr=0.0.0.0:8080 --advertise-addr=${each.value.ip} --join=${local.join_addresses} --cache=512MiB"
+      entrypoint = "/cockroach/cockroach.sh start --insecure --http-addr=0.0.0.0:8080 --advertise-addr=${local.ips[each.value.id]} --join=${local.join_addresses} --cache=512MiB"
     }
   )
+}
+
+
+
+resource "null_resource" "initialize" {
+  depends_on = [module.this]
+
+  connection {
+    type  = "ssh"
+    user  = var.proxmox_ssh_username
+    host  = var.proxmox_host
+    agent = var.proxmox_ssh_agent
+  }
+
+  provisioner "remote-exec" {
+    inline = [
+      "sleep 10",
+      "sudo pct exec ${var.cockroachdb.servers[0].id} -- cockroach init --insecure --host=localhost:26257 2>/dev/null || echo 'Cluster já inicializado'",
+      "sudo pct exec ${var.cockroachdb.servers[0].id} -- cockroach sql --insecure -e \"SET CLUSTER SETTING enterprise.license = '${var.cockroachdb_enterprise_license}';\"",
+      "sudo pct exec ${var.cockroachdb.servers[0].id} -- cockroach sql --insecure -e \"SET CLUSTER SETTING cluster.organization = '${var.cockroachdb_cluster_organization}';\"",
+      "sudo pct exec ${var.cockroachdb.servers[0].id} -- cockroach node status --insecure",
+    ]
+  }
 }

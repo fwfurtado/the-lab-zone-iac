@@ -13,16 +13,19 @@ locals {
 
   # Merge dos valores do container com os defaults
   container = {
-    id          = var.container.id
-    hostname    = var.container.hostname
-    description = var.container.description
-    entrypoint  = var.container.entrypoint
+    id            = var.container.id
+    hostname      = var.container.hostname
+    description   = var.container.description
+    entrypoint    = var.container.entrypoint
+    started       = var.container.started
+    should_reboot = var.container.should_reboot
 
     image = {
       repository = var.container.image.repository
       storage_id = coalesce(var.container.image.storage_id, var.defaults.image.storage_id, "local")
       registry   = coalesce(var.container.image.registry, var.defaults.image.registry, "docker.io")
       tag        = coalesce(var.container.image.tag, var.defaults.image.tag, "latest")
+      type       = coalesce(var.container.image.type, var.defaults.image.type, "alpine")
     }
 
     resources = {

@@ -6,6 +6,7 @@ resource "proxmox_virtual_environment_container" "this" {
   vm_id       = local.container.id
 
   template = false
+  started  = local.container.started
 
   cpu {
     cores = local.container.resources.cpu
@@ -35,7 +36,7 @@ resource "proxmox_virtual_environment_container" "this" {
 
   operating_system {
     template_file_id = module.oci-image-download.id
-    type             = "alpine"
+    type             = local.container.image.type
   }
 
   network_interface {
@@ -77,7 +78,7 @@ resource "proxmox_virtual_environment_container" "this" {
 
 resource "null_resource" "reboot" {
   depends_on = [proxmox_virtual_environment_container.this, null_resource.envs, null_resource.files, null_resource.override_entrypoint]
-
+  count = local.container.should_reboot ? 1 : 0
   triggers = {
     container_id = proxmox_virtual_environment_container.this.id
   }
@@ -91,7 +92,32 @@ resource "null_resource" "reboot" {
 
   provisioner "remote-exec" {
     inline = [
-      "sudo pct reboot ${local.container.id} --timeout 60",
+      "timeout 1m bash -c 'sudo pct reboot ${local.container.id}' || { echo \"Timeout exceeded: Reboot container '${local.container.hostname}' failed\" >&2; exit 1; }",
+      "timeout 1m bash -c 'until sudo pct status ${local.container.id} | grep -iq running; do echo \"Still rebooting...\"; sleep 5; done' || { echo \"Timeout exceeded: Reboot container '${local.container.hostname}' failed\" >&2; exit 1; }",
+    ]
+  }
+}
+
+
+
+resource "null_resource" "force_start" {
+  depends_on = [proxmox_virtual_environment_container.this, null_resource.envs, null_resource.files, null_resource.override_entrypoint]
+  count = local.container.started ? 0 : 1
+  triggers = {
+    container_id = proxmox_virtual_environment_container.this.id
+  }
+
+  connection {
+    type  = "ssh"
+    user  = local.proxmox.ssh.username
+    host  = local.proxmox.ssh.host
+    agent = local.proxmox.ssh.agent
+  }
+
+  provisioner "remote-exec" {
+    inline = [
+      "timeout 1m bash -c 'sudo pct start ${local.container.id}' || { echo \"Timeout exceeded: Start container '${local.container.hostname}' failed\" >&2; exit 1; }",
+      "timeout 1m bash -c 'until sudo pct status ${local.container.id} | grep -iq running; do echo \"Still starting...\"; sleep 5; done' || { echo \"Timeout exceeded: Start container '${local.container.hostname}' failed\" >&2; exit 1; }",
     ]
   }
 }

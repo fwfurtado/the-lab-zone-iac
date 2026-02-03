@@ -17,3 +17,7 @@ output "ip_cidr" {
 output "image" {
   value = module.oci-image-download
 }
+
+output "entrypoint" {
+  value = local.container.entrypoint
+}

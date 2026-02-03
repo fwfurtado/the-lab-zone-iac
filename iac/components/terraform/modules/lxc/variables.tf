@@ -23,14 +23,16 @@ variable "container" {
     id          = number
     hostname    = string
     description = string
-
-    entrypoint = optional(string)
+    started     = optional(bool, true)
+    entrypoint  = optional(string)
+    should_reboot = optional(bool, true)
 
     image = object({
       repository = string
       storage_id = optional(string)
       registry   = optional(string)
       tag        = optional(string)
+      type       = optional(string)
     })
 
     resources = object({
@@ -77,6 +79,7 @@ variable "defaults" {
       storage_id = optional(string, "local")
       registry   = optional(string, "docker.io")
       tag        = optional(string, "latest")
+      type       = optional(string, "alpine")
     }), {})
     network = optional(object({
       interface_name = optional(string, "eth0")
