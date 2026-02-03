@@ -20,3 +20,5 @@ export CONSUL_HTTP_TOKEN={{ op://homelab/Consul Server/acl management/secret-id 
 
 export TF_VAR_ghcr_username={{ op://development/Github Package Token/username }}
 export TF_VAR_ghcr_password={{ op://development/Github Package Token/credential }}
+
+export TF_VAR_ts_authkey={{ op://development/Tailscale/Auth Key }}

@@ -1,0 +1,30 @@
+# yaml-language-server: $schema=https://atmos.tools/schemas/atmos/atmos-manifest/1.0/atmos-manifest.json
+
+import:
+  - catalog/_default.yaml
+
+vars:
+  stage: platform
+
+components:
+  terraform:
+    tailscale:
+      settings:
+        apply_auto_approve: false
+      vars:
+        tailscale:
+          id: 400
+          hostname: "tailscale"
+          description: "Tailscale"
+          ip_cidr: "192.168.40.40/24"
+          routes:
+            - "192.168.40.0/24"        
+        container:
+          image:
+            repository: "tailscale/tailscale"
+            tag: "v1.92.5"
+          resources:
+            cpu: 1
+            memory: 1024
+            disk:
+              size: 5

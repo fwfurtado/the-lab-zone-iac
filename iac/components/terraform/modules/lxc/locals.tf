@@ -6,12 +6,12 @@ locals {
     }
     ssh = {
       username = var.proxmox_ssh_username
-      host = var.proxmox_host
-      agent = var.proxmox_ssh_agent
+      host     = var.proxmox_host
+      agent    = var.proxmox_ssh_agent
     }
   }
 
-   # Merge dos valores do container com os defaults
+  # Merge dos valores do container com os defaults
   container = {
     id          = var.container.id
     hostname    = var.container.hostname

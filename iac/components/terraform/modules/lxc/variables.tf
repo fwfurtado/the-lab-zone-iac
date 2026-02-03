@@ -1,20 +1,20 @@
 variable "proxmox_node_name" {
-  type = string
+  type        = string
   description = "The name of the Proxmox node"
 }
 
 variable "proxmox_host" {
-  type = string
+  type        = string
   description = "The host of the Proxmox node"
 }
 
 variable "proxmox_ssh_username" {
-  type = string
+  type        = string
   description = "The username of the Proxmox SSH user"
 }
 
 variable "proxmox_ssh_agent" {
-  type = bool
+  type        = bool
   description = "Whether to use the SSH agent"
 }
 
@@ -24,7 +24,7 @@ variable "container" {
     hostname    = string
     description = string
 
-    entrypoint = optional(string, null)
+    entrypoint = optional(string)
 
     image = object({
       repository = string

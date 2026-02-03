@@ -15,9 +15,9 @@ resource "null_resource" "override_entrypoint" {
 
   provisioner "remote-exec" {
     inline = [
-    #   "echo 'Setting entrypoint to ${local.container.entrypoint}' ",
+      "echo 'Setting entrypoint to ${local.container.entrypoint}' ",
       "timeout 10s bash -c 'sudo pct set ${local.container.id} --entrypoint \"${local.container.entrypoint}\"'",
-    #   "echo 'Entrypoint set to ${local.container.entrypoint}'",
+      "echo 'Entrypoint set to ${local.container.entrypoint}'",
     ]
   }
 }
