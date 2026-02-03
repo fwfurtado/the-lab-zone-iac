@@ -24,3 +24,6 @@ export TF_VAR_ghcr_password={{ op://development/Github Package Token/credential 
 export TF_VAR_ts_authkey={{ op://development/Tailscale/Auth Key }}
 
 export TF_VAR_cloudflare_api_key={{ op://development/Cloudflare/the-lab.zone }}
+
+export TF_VAR_cockroachdb_enterprise_license={{ op://development/Cockroachlabs/free enterprise key }}
+export TF_VAR_cockroachdb_cluster_organization="TheLabZone"
