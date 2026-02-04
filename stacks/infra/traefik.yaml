@@ -6,8 +6,6 @@ import:
 components:
   terraform:
     traefik:
-      settings:
-        apply_auto_approve: false
       vars:
         traefik:
           id: 500
