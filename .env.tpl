@@ -3,6 +3,7 @@ export PROXMOX_VE_ENDPOINT={{ op://homelab/Proxmox Terraform ssh/admin console/a
 export PROXMOX_VE_INSECURE=true
 export PROXMOX_VE_SSH_USERNAME={{ op://homelab/Proxmox Terraform ssh/username }}
 export PROXMOX_VE_SSH_AGENT=true
+
 export TF_VAR_proxmox_node_name=proxmox
 export TF_VAR_proxmox_host={{ op://homelab/Proxmox Terraform ssh/URL}}
 export TF_VAR_proxmox_ssh_username={{ op://homelab/Proxmox Terraform ssh/username }}
@@ -11,19 +12,6 @@ export TF_VAR_proxmox_ssh_agent=true
 export TF_TOKEN_app_terraform_io={{ op://development/Terraform/api token/homelab-cli }}
 export TFE_TOKEN={{ op://development/Terraform/api token/homelab-cli }}
 
-export TF_VAR_consul_esm_token={{ op://homelab/Consul Server/acl esm/secret-id }}
-
-export TF_VAR_consul_datacenter="the-lab"
-export CONSUL_HTTP_ADDR={{ op://homelab/Consul Server/address }}
-export CONSUL_HTTP_SSL=false
-export CONSUL_HTTP_TOKEN={{ op://homelab/Consul Server/acl management/secret-id }}
-
-export TF_VAR_ghcr_username={{ op://development/Github Package Token/username }}
-export TF_VAR_ghcr_password={{ op://development/Github Package Token/credential }}
-
 export TF_VAR_ts_authkey={{ op://development/Tailscale/Auth Key }}
 
 export TF_VAR_cloudflare_api_key={{ op://development/Cloudflare/the-lab.zone }}
-
-export TF_VAR_cockroachdb_enterprise_license={{ op://development/Cockroachlabs/free enterprise key }}
-export TF_VAR_cockroachdb_cluster_organization="TheLabZone"

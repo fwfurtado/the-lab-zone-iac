@@ -1,0 +1,7 @@
+terraform:
+  backend_type: cloud
+  backend:
+    cloud:
+      organization: the-lab-zone
+      workspaces:
+        name: "{{ .namespace }}-{{ .environment }}-{{ .stage }}-{{ .component }}"
