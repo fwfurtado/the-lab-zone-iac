@@ -1,0 +1,32 @@
+# yaml-language-server: $schema=https://atmos.tools/schemas/atmos/atmos-manifest/1.0/atmos-manifest.json
+
+import:
+  - catalog/_default.yaml
+
+components:
+  terraform:
+    talos-cluster:
+      metadata:
+        terraform_workspace: "{{ .atmos_component }}"
+      vars:
+        cluster:
+          name: "platform"
+          description: "Talos platform cluster"
+          tags:
+            - "platform"
+            - "k8s"
+            - "talos"
+        talos_iso_file_id: "local:iso/talos-amd64.iso"
+        nodes:
+          - name: "cp-1"
+            id: 200
+            role: "controlplane"
+            cpu: 4
+            memory: 12288
+            disk_size: 20
+          - name: "worker-1"
+            id: 201
+            role: "worker"
+            cpu: 6
+            memory: 16384
+            disk_size: 20
