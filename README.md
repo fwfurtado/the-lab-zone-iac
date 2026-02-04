@@ -4,10 +4,11 @@ Infrastructure-as-code for the homelab, built with Atmos and Terraform modules.
 
 ## Structure
 
-- `iac/atmos.yaml`: Atmos configuration.
-- `iac/components/terraform/modules/`: Reusable Terraform modules.
-- `iac/components/terraform/components/`: Atmos Terraform components.
-- `iac/stacks/`: Stack definitions and environment manifests.
+- `atmos.yaml`: Atmos configuration.
+- `components/terraform/modules/`: Reusable Terraform modules.
+- `components/terraform/components/`: Atmos Terraform components (e.g., Tailscale, Traefik).
+- `stacks/`: Stack definitions and environment manifests.
+- `workflows/`: Atmos workflows for common operations.
 
 ## Getting started
 
@@ -17,5 +18,6 @@ Infrastructure-as-code for the homelab, built with Atmos and Terraform modules.
 
 ## Notes
 
-- `iac/stacks/catalog/_default.yaml` provides default values for stacks.
-- `iac/stacks/platform/consul.yaml` defines the Consul platform stack.
+- `stacks/catalog/_default.yaml` provides defaults for infra stacks.
+- `stacks/infra/tailscale.yaml` and `stacks/infra/traefik.yaml` define the infra stacks.
+- `workflows/infra.yaml` provides plan/apply/destroy workflows.
