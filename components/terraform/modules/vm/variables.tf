@@ -3,7 +3,7 @@ variable "proxmox_node_name" {
   description = "The name of the Proxmox node"
 }
 
-variable "cluster" {
+variable "group" {
   type = object({
     name        = string
     description = optional(string)
@@ -11,14 +11,13 @@ variable "cluster" {
     started     = optional(bool)
     on_boot     = optional(bool)
   })
-  description = "The Talos cluster configuration"
+  description = "The VM group configuration"
 }
 
-variable "nodes" {
+variable "vms" {
   type = list(object({
     name           = string
     id             = number
-    role           = string
     cpu            = number
     memory         = number
     disk_size      = number
@@ -29,18 +28,46 @@ variable "nodes" {
     on_boot        = optional(bool)
     tags           = optional(list(string), [])
   }))
-  description = "The Talos nodes configuration"
-}
-
-variable "talos_iso_file_id" {
-  type        = string
-  description = "Proxmox file ID for the Talos ISO (e.g. local:iso/talos-amd64.iso)"
+  description = "The VM definitions"
 }
 
 variable "operating_system_type" {
   type        = string
   description = "The Proxmox OS type for the VM"
   default     = "l26"
+}
+
+variable "cdrom" {
+  type = object({
+    enabled   = optional(bool, true)
+    file_id   = optional(string)
+    interface = optional(string, "ide2")
+  })
+  description = "Optional CDROM settings"
+  default     = {}
+
+  validation {
+    condition     = coalesce(try(var.cdrom.enabled, null), true) == false || try(var.cdrom.file_id, null) != null
+    error_message = "cdrom.file_id must be set when cdrom.enabled is true."
+  }
+}
+
+variable "boot_order" {
+  type        = list(string)
+  description = "Boot device order"
+  default     = ["scsi0"]
+}
+
+variable "agent_enabled" {
+  type        = bool
+  description = "Enable the Proxmox guest agent"
+  default     = false
+}
+
+variable "stop_on_destroy" {
+  type        = bool
+  description = "Stop VM on destroy"
+  default     = true
 }
 
 variable "defaults" {
@@ -54,6 +81,6 @@ variable "defaults" {
     started = optional(bool, true)
     on_boot = optional(bool, true)
   })
-  description = "Default values for Talos VMs"
+  description = "Default values for VMs"
   default     = {}
 }

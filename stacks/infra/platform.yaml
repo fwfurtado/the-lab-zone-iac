@@ -16,7 +16,7 @@ components:
             - "platform"
             - "k8s"
             - "talos"
-        talos_iso_file_id: "local:iso/talos-amd64.iso"
+        talos_version: "v1.7.5"
         nodes:
           - name: "cp-1"
             id: 200
@@ -24,9 +24,11 @@ components:
             cpu: 4
             memory: 12288
             disk_size: 20
+            ip_cidr: "10.40.0.20/24"
           - name: "worker-1"
             id: 201
             role: "worker"
             cpu: 6
             memory: 16384
             disk_size: 20
+            ip_cidr: "10.40.0.21/24"

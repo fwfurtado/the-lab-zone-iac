@@ -1,17 +1,17 @@
 resource "proxmox_virtual_environment_vm" "nodes" {
-  for_each = local.nodes
+  for_each = local.vms
 
   name        = each.value.name
-  description = "Talos ${local.cluster.name} ${each.value.role}"
+  description = local.group.description
   tags        = each.value.tags
 
   node_name = var.proxmox_node_name
   vm_id     = each.value.id
 
   agent {
-    enabled = false
+    enabled = var.agent_enabled
   }
-  stop_on_destroy = true
+  stop_on_destroy = var.stop_on_destroy
 
   cpu {
     cores = each.value.cpu
@@ -35,13 +35,16 @@ resource "proxmox_virtual_environment_vm" "nodes" {
     type = var.operating_system_type
   }
 
-  cdrom {
-    enabled   = true
-    file_id   = var.talos_iso_file_id
-    interface = "ide2"
+  dynamic "cdrom" {
+    for_each = local.cdrom_enabled ? [local.cdrom] : []
+    content {
+      enabled   = true
+      file_id   = cdrom.value.file_id
+      interface = cdrom.value.interface
+    }
   }
 
-  boot_order = ["scsi0", "ide2"]
+  boot_order = var.boot_order
 
   started = each.value.started
   on_boot = each.value.on_boot
