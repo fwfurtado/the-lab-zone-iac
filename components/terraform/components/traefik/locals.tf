@@ -191,7 +191,7 @@ locals {
           proxmox = {
             loadBalancer = {
               servers = [
-                { url = "https://192.168.40.200:8006" }
+                { url = "https://10.40.0.200:8006" }
               ]
               serversTransport = "insecureTransport"
             }
@@ -200,7 +200,7 @@ locals {
           truenas = {
             loadBalancer = {
               servers = [
-                { url = "https://192.168.40.4" }
+                { url = "https://10.40.0.4" }
               ]
               serversTransport = "insecureTransport"
             }
@@ -209,7 +209,7 @@ locals {
           unifi = {
             loadBalancer = {
               servers = [
-                { url = "https://192.168.40.1" }
+                { url = "https://10.40.0.1" }
               ]
               serversTransport = "insecureTransport"
             }

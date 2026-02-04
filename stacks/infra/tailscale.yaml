@@ -10,12 +10,12 @@ components:
         terraform_workspace: "{{ .atmos_component }}"
       vars:
         tailscale:
-          id: 400
+          id: 100
           hostname: "tailscale"
           description: "Tailscale"
-          ip_cidr: "192.168.40.40/24"
+          ip_cidr: "10.40.0.10/24"
           routes:
-            - "192.168.40.0/24"
+            - "10.40.0.0/24"
         container:
           image:
             repository: "tailscale/tailscale"

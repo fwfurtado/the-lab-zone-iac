@@ -67,6 +67,7 @@ resource "proxmox_virtual_environment_container" "this" {
 
   lifecycle {
     ignore_changes = [
+      started,
       console,
       operating_system[0].template_file_id,
       network_interface[0].mac_address,

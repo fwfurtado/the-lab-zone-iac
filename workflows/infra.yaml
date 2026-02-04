@@ -14,5 +14,5 @@ workflows:
   plan-all:
     description: "Plan all infrastructure stacks"
     steps:
-      - command: terraform plan tailscale -s infra -lock=false
-      - command: terraform plan traefik -s infra -lock=false
+      - command: terraform plan tailscale -s infra
+      - command: terraform plan traefik -s infra

@@ -17,6 +17,8 @@ module "this" {
       network = {
         ip_cidr = var.tailscale.ip_cidr,
       },
+      started = false,
+      should_reboot = false,
       environment_variables = {
         TS_AUTHKEY   = nonsensitive(var.ts_authkey),
         TS_ROUTES    = join(",", var.tailscale.routes),
