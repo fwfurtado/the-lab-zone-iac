@@ -1,12 +1,11 @@
 # yaml-language-server: $schema=https://atmos.tools/schemas/atmos/atmos-manifest/1.0/atmos-manifest.json
-
 terraform:
   backend_type: cloud
   backend:
     cloud:
       organization: the-lab-zone
       workspaces:
-        name: "{{ .stage }}-{{ .component }}"
+        name: "{{ .component }}"
 
 vars:
   stage: "infra"
@@ -21,6 +20,7 @@ vars:
       storage_id: "local"
       registry: "docker.io"
       tag: "latest"
+      type: "alpine"
     network:
       interface_name: "eth0"
       bridge: "vmbr0"

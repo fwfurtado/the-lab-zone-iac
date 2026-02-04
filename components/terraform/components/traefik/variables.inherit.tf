@@ -25,7 +25,7 @@ variable "proxmox_ssh_agent" {
 
 variable "container" {
   type = any
-  description = "The container configuration for the Vault server - see modules/lxc/variables.tf for more details"
+  description = "The container configuration - see modules/lxc/variables.tf for more details"
 }
 
 variable "defaults" {

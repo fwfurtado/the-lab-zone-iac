@@ -6,6 +6,8 @@ import:
 components:
   terraform:
     tailscale:
+      metadata:
+        terraform_workspace: "{{ .atmos_component }}"
       vars:
         tailscale:
           id: 400

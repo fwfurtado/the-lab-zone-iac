@@ -6,6 +6,8 @@ import:
 components:
   terraform:
     traefik:
+      metadata:
+        terraform_workspace: "{{ .atmos_component }}"
       vars:
         traefik:
           id: 500

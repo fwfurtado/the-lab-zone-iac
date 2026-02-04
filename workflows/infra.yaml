@@ -1,0 +1,18 @@
+workflows:
+  apply-all:
+    description: "Apply all infrastructure stacks"
+    steps:
+      - command: terraform apply tailscale -s infra -auto-approve
+      - command: terraform apply traefik -s infra -auto-approve
+
+  destroy-all:
+    description: "Destroy all infrastructure stacks"
+    steps:
+      - command: terraform destroy tailscale -s infra -auto-approve
+      - command: terraform destroy traefik -s infra -auto-approve
+
+  plan-all:
+    description: "Plan all infrastructure stacks"
+    steps:
+      - command: terraform plan tailscale -s infra -lock=false
+      - command: terraform plan traefik -s infra -lock=false

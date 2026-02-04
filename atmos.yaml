@@ -13,7 +13,15 @@ stacks:
     - "**/*"
   excluded_paths:
     - "catalog/**/*"
-  name_pattern: "{stage}-{component}"
+  name_pattern: "{stage}"
+
+workflows:
+  base_path: "workflows"
+
+templates:
+  settings:
+    enabled: true
+
 
 logs:
   file: "/dev/stderr"
