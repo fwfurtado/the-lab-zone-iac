@@ -1,5 +1,4 @@
 module "this" {
-  depends_on = [consul_acl_token.traefik]
   source     = "../../modules/lxc"
 
   proxmox_node_name    = var.proxmox_node_name

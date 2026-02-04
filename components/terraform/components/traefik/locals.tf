@@ -43,9 +43,6 @@ locals {
         websecure = {
           address = ":443"
         }
-        "cockroachdb-sql-tls" = {
-          address = ":26257"
-        }
       }
 
       certificatesResolvers = {
@@ -62,14 +59,6 @@ locals {
       }
 
       providers = {
-        consulCatalog = {
-          endpoint = {
-            address = data.tfe_outputs.consul.values.connections.leader.address
-            token   = data.consul_acl_token_secret_id.this.secret_id
-          }
-          exposedByDefault = false
-          constraints      = "Tag(`traefik.enable=true`)"
-        }
         file = {
           filename = "/etc/traefik/dynamic_config.yaml"
           watch    = true
@@ -95,6 +84,22 @@ locals {
             }
           }
 
+          wildcard_platform = {
+            rule        = "Host(`_wildcard.platform.the-lab.zone`)"
+            service     = "noop@internal"
+            priority    = 1
+            entryPoints = ["websecure"]
+            tls = {
+              certResolver = "cloudflare"
+              domains = [
+                {
+                  main = "platform.the-lab.zone"
+                  sans = ["*.platform.the-lab.zone"]
+                }
+              ]
+            }
+          }
+
           wildcard_tooling = {
             rule        = "Host(`_wildcard.tooling.the-lab.zone`)"
             service     = "noop@internal"
@@ -106,6 +111,38 @@ locals {
                 {
                   main = "tooling.the-lab.zone"
                   sans = ["*.tooling.the-lab.zone"]
+                }
+              ]
+            }
+          }
+
+          wildcard_apps = {
+            rule        = "Host(`_wildcard.apps.the-lab.zone`)"
+            service     = "noop@internal"
+            priority    = 1
+            entryPoints = ["websecure"]
+            tls = {
+              certResolver = "cloudflare"
+              domains = [
+                {
+                  main = "apps.the-lab.zone"
+                  sans = ["*.apps.the-lab.zone"]
+                }
+              ]
+            }
+          }
+
+          wildcard_k8s = {
+            rule        = "Host(`_wildcard.k8s.the-lab.zone`)"
+            service     = "noop@internal"
+            priority    = 1
+            entryPoints = ["websecure"]
+            tls = {
+              certResolver = "cloudflare"
+              domains = [
+                {
+                  main = "k8s.the-lab.zone"
+                  sans = ["*.k8s.the-lab.zone"]
                 }
               ]
             }
@@ -148,20 +185,6 @@ locals {
             entryPoints = ["websecure"]
             tls         = {}
           }
-
-          consul = {
-            rule        = "Host(`consul.infra.the-lab.zone`)"
-            service     = "consul"
-            entryPoints = ["websecure"]
-            tls         = {}
-          }
-
-          vault = {
-            rule        = "Host(`vault.infra.the-lab.zone`)"
-            service     = "vault"
-            entryPoints = ["websecure"]
-            tls         = {}
-          }
         }
 
         services = {
@@ -187,28 +210,6 @@ locals {
             loadBalancer = {
               servers = [
                 { url = "https://192.168.40.1" }
-              ]
-              serversTransport = "insecureTransport"
-            }
-          }
-
-          consul = {
-            loadBalancer = {
-              servers = [
-                { url = "http://192.168.40.11:8500" },
-                { url = "http://192.168.40.12:8500" },
-                { url = "http://192.168.40.13:8500" },
-              ]
-              serversTransport = "insecureTransport"
-            }
-          }
-
-          vault = {
-            loadBalancer = {
-              servers = [
-                { url = "http://192.168.40.31:8200" },
-                { url = "http://192.168.40.32:8200" },
-                { url = "http://192.168.40.33:8200" },
               ]
               serversTransport = "insecureTransport"
             }
