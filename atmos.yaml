@@ -4,7 +4,8 @@ components:
   terraform:
     base_path: "components/terraform/components"
     deploy_run_init: true
-    auto_generate_backend_file: false
+    apply_auto_approve: false
+    auto_generate_backend_file: true
 
 stacks:
   base_path: "stacks"

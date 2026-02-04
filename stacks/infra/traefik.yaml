@@ -3,9 +3,6 @@
 import:
   - catalog/_default.yaml
 
-vars:
-  stage: platform
-
 components:
   terraform:
     traefik:
@@ -18,7 +15,7 @@ components:
           description: "Traefik"
           ip_cidr: "192.168.40.50/24"
           dns:
-            servers: ["1.1.1.1", "1.0.0.1"]          
+            servers: ["1.1.1.1", "1.0.0.1"]
         container:
           image:
             repository: "traefik"
@@ -28,7 +25,7 @@ components:
             memory: 2048
             disk:
               size: 5
-          mount_points:            
+          mount_points:
             - volume: "ssd-standard"
               path: "/traefik/acme"
               size: "2G"

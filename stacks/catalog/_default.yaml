@@ -1,7 +1,21 @@
-# stacks/catalog/_defaults.yaml
+# yaml-language-server: $schema=https://atmos.tools/schemas/atmos/atmos-manifest/1.0/atmos-manifest.json
+
+terraform:
+  backend_type: cloud
+  backend:
+    cloud:
+      organization: the-lab-zone
+      workspaces:
+        name: "{{ .stage }}-{{ .component }}"
 
 vars:
-  consul_datacenter: "the-lab"
+  stage: "infra"
+
+  proxmox_node_name: "proxmox"
+  proxmox_host: !env TF_VAR_proxmox_host
+  proxmox_ssh_username: !env TF_VAR_proxmox_ssh_username
+  proxmox_ssh_agent: true
+
   defaults:
     image:
       storage_id: "local"
