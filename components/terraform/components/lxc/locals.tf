@@ -55,5 +55,7 @@ locals {
     environment_variables = coalesce(var.container.environment_variables, var.defaults.environment_variables, {})
     mount_points          = coalesce(var.container.mount_points, var.defaults.mount_points, [])
     files                 = coalesce(var.container.files, var.defaults.files, {})
+    tags                  = sort(distinct([for t in coalesce(var.container.tags, []) : lower(t)]))
   }
 }
+

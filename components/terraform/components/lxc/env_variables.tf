@@ -18,3 +18,4 @@ resource "null_resource" "envs" {
     inline = [for key, value in local.container.environment_variables : "timeout 5s bash -c \"echo 'lxc.environment.runtime: ${key}=${value}' | sudo tee -a /etc/pve/lxc/${local.container.id}.conf \""]
   }
 }
+

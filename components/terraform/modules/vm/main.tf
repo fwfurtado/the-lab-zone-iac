@@ -15,6 +15,7 @@ resource "proxmox_virtual_environment_vm" "nodes" {
 
   cpu {
     cores = each.value.cpu
+    type = var.cpu_type
   }
 
   memory {
@@ -52,6 +53,7 @@ resource "proxmox_virtual_environment_vm" "nodes" {
   lifecycle {
     ignore_changes = [
       network_device[0].mac_address,
+      cdrom, # avoid 403 VM.Config.CDROM on update; CDROM only needed for initial boot
     ]
   }
 }

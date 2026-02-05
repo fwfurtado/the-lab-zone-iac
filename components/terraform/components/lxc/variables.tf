@@ -1,3 +1,8 @@
+variable "stage" {
+  type        = string
+  description = "The stage of the stack"
+}
+
 variable "proxmox_node_name" {
   type        = string
   description = "The name of the Proxmox node"
@@ -58,6 +63,7 @@ variable "container" {
       volume = string
       path   = string
       size   = string
+      backup = optional(bool)
     })), [])
 
     features = optional(object({
@@ -67,6 +73,7 @@ variable "container" {
 
     files                 = optional(map(string), {})
     environment_variables = optional(map(string), {})
+    tags                  = optional(list(string), [])
 
   })
   description = "The container configuration"
@@ -99,8 +106,23 @@ variable "defaults" {
       volume = string
       path   = string
       size   = string
+      backup = optional(bool, false)
     })), [])
     files = optional(map(string), {})
   })
   default = {}
 }
+
+variable "extra_pve_conf_lines" {
+  type        = list(string)
+  description = "Additional lines to append to /etc/pve/lxc/<id>.conf on the Proxmox host"
+  default     = []
+}
+
+variable "extra_reboot_after_pve_changes" {
+  type        = bool
+  description = "Whether to force a pct reboot after applying extra_pve_conf_lines"
+  default     = false
+}
+
+

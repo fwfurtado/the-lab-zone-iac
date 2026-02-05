@@ -1,3 +1,6 @@
+# Talos provider connects to each node at <node_ip>:50000 (Talos API).
+# The host running Terraform must have network route to the node IPs (e.g. same LAN,
+# Tailscale subnet router, or VPN). Otherwise you get "no route to host" on apply.
 resource "talos_machine_secrets" "this" {}
 
 data "talos_machine_configuration" "controlplane" {
@@ -33,6 +36,7 @@ resource "talos_machine_configuration_apply" "nodes" {
   config_patches = concat(
     var.talos_config_patches,
     [local.install_disk_patch],
+    try([local.network_patches[each.key]], []),
     each.value.role == "controlplane" ? var.controlplane_config_patches : var.worker_config_patches
   )
 

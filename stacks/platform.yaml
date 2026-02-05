@@ -1,14 +1,21 @@
 # yaml-language-server: $schema=https://atmos.tools/schemas/atmos/atmos-manifest/1.0/atmos-manifest.json
 
 import:
-  - catalog/_default.yaml
+  - catalog/_vm.yaml
 
 components:
   terraform:
     talos-cluster:
       metadata:
-        terraform_workspace: "{{ .atmos_component }}"
+        terraform_workspace: "{{ .stack }}"
       vars:
+        talos_version: "v1.7.5"
+        talos_image_platform: "nocloud"
+        talos_image_architecture: "amd64"
+        talos_image_extensions:
+          - "siderolabs/iscsi-tools"
+          - "siderolabs/qemu-guest-agent"
+        cluster_endpoint: "https://10.40.0.20:6443"
         cluster:
           name: "platform"
           description: "Talos platform cluster"
@@ -16,7 +23,7 @@ components:
             - "platform"
             - "k8s"
             - "talos"
-        talos_version: "v1.7.5"
+            - "vm"
         nodes:
           - name: "cp-1"
             id: 200

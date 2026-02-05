@@ -1,0 +1,44 @@
+# yaml-language-server: $schema=https://atmos.tools/schemas/atmos/atmos-manifest/1.0/atmos-manifest.json
+
+import:
+  - catalog/_lxc.yaml
+
+components:
+  terraform:
+    lxc:
+      component: lxc
+      metadata:
+        terraform_workspace: "{{ .stack }}"
+      vars:
+        container:
+          id: 500
+          hostname: "traefik"
+          description: "Traefik"
+          network:
+            ip_cidr: "10.40.0.50/24"
+            dns:
+              servers: ["1.1.1.1", "1.0.0.1"]
+          tags:
+            - "core"
+            - "{{ .stack }}"
+            - "{{ .component }}"
+          image:
+            repository: "traefik"
+            tag: "v3.0"
+          resources:
+            cpu: 2
+            memory: 2048
+            disk:
+              size: 5
+          mount_points:
+            - volume: "ssd-standard"
+              path: "/traefik/acme"
+              size: "2G"
+              backup: true
+          entrypoint: "/entrypoint.sh --configFile=/etc/traefik/traefik.yaml"
+          files:
+            "/etc/traefik/traefik.yaml": !include.raw stacks/catalog/lxc/traefik/traefik.yaml
+            "/etc/traefik/dynamic_config.yaml": !include.raw stacks/catalog/lxc/traefik/dynamic_config.yaml
+          environment_variables:
+            CF_DNS_API_TOKEN: !env CLOUDFLARE_API_KEY
+

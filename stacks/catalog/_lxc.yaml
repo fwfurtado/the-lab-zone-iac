@@ -5,14 +5,17 @@ terraform:
     cloud:
       organization: the-lab-zone
       workspaces:
-        name: "{{ .component }}"
+        tags:
+          - "{{ .vars.stage }}"
+          - "{{ .stack }}"
+          - "{{ .component }}"
 
 vars:
   stage: "infra"
 
   defaults:
     image:
-      storage_id: "local"
+      storage_id: "cold-storage"
       registry: "docker.io"
       tag: "latest"
       type: "alpine"
@@ -23,7 +26,7 @@ vars:
       dns_servers: []
     environment_variables: {}
     disk:
-      storage_id: "local-lvm"
+      storage_id: "ssd-standard"
     features:
       nesting: true
       unprivileged: true

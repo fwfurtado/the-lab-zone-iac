@@ -21,3 +21,4 @@ resource "null_resource" "override_entrypoint" {
     ]
   }
 }
+

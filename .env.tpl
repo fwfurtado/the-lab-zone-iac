@@ -11,6 +11,6 @@ export TF_VAR_proxmox_ssh_agent=true
 
 export TF_TOKEN_app_terraform_io={{ op://development/Terraform/api token/homelab-cli }}
 
-export TF_VAR_ts_authkey={{ op://development/Tailscale/Auth Key }}
+export TS_AUTHKEY={{ op://development/Tailscale/Auth Key }}
 
-export TF_VAR_cloudflare_api_key={{ op://development/Cloudflare/the-lab.zone }}
+export CLOUDFLARE_API_KEY={{ op://development/Cloudflare/the-lab.zone }}

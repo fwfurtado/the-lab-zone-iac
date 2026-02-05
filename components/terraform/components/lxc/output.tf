@@ -15,9 +15,14 @@ output "ip_cidr" {
 }
 
 output "image" {
-  value = module.oci-image-download
+  value = {
+    id        = proxmox_virtual_environment_oci_image.this.id
+    name      = proxmox_virtual_environment_oci_image.this.reference
+    file_name = proxmox_virtual_environment_oci_image.this.file_name
+  }
 }
 
 output "entrypoint" {
   value = local.container.entrypoint
 }
+

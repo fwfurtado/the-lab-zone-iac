@@ -1,0 +1,41 @@
+# yaml-language-server: $schema=https://atmos.tools/schemas/atmos/atmos-manifest/1.0/atmos-manifest.json
+
+import:
+  - catalog/_lxc.yaml
+
+components:
+  terraform:
+    lxc:
+      component: lxc
+      metadata:
+        terraform_workspace: "{{ .stack }}"
+      vars:
+        container:
+          id: 100
+          hostname: "tailscale"
+          description: "Tailscale"
+          network:
+            ip_cidr: "10.40.0.10/24"
+          tags:
+            - "core"
+            - "{{ .stack }}"
+            - "{{ .component }}"
+          image:
+            repository: "tailscale/tailscale"
+            tag: "v1.92.5"
+          resources:
+            cpu: 1
+            memory: 1024
+            disk:
+              size: 5
+          entrypoint: "/usr/local/bin/containerboot"
+          environment_variables:
+            TS_AUTHKEY: !env TS_AUTHKEY
+            TS_ROUTES: "10.40.0.0/24"
+            TS_STATE_DIR: "/var/tailscale/data"
+            TS_HOSTNAME: "tailscale-node"
+            PATH: "/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+        extra_pve_conf_lines:
+          - "lxc.cgroup2.devices.allow: c 10:200 rwm"
+          - "lxc.mount.entry: /dev/net/tun dev/net/tun none bind,create=file"
+

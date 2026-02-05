@@ -6,7 +6,7 @@ Infrastructure-as-code for the homelab, built with Atmos and Terraform modules.
 
 - `atmos.yaml`: Atmos configuration.
 - `components/terraform/modules/`: Reusable Terraform modules.
-- `components/terraform/components/`: Atmos Terraform components (e.g., Tailscale, Traefik).
+- `components/terraform/components/`: Atmos Terraform components (e.g., Talos cluster, generic LXC container).
 - `stacks/`: Stack definitions and environment manifests.
 - `workflows/`: Atmos workflows for common operations.
 
@@ -18,6 +18,7 @@ Infrastructure-as-code for the homelab, built with Atmos and Terraform modules.
 
 ## Notes
 
-- `stacks/catalog/_default.yaml` provides defaults for infra stacks.
-- `stacks/infra/tailscale.yaml` and `stacks/infra/traefik.yaml` define the infra stacks.
-- `workflows/infra.yaml` provides plan/apply/destroy workflows.
+- `stacks/catalog/_default.yaml` provides defaults for infra-style stacks (e.g. Proxmox LXC).
+- `stacks/tailscale/tailscale.yaml` defines the Tailscale LXC stack.
+- `stacks/traefik/traefik.yaml` defines the Traefik LXC stack.
+- `workflows/infra.yaml` provides plan/apply/destroy workflows for these stacks.

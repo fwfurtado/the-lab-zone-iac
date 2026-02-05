@@ -52,6 +52,12 @@ variable "cdrom" {
   }
 }
 
+variable "cpu_type" {
+  type        = string
+  description = "Proxmox/QEMU CPU type. Use x86-64-v2-AES or higher for Talos; qemu64 is level 1 and too old for Talos 1.7+"
+  default     = "qemu64"
+}
+
 variable "boot_order" {
   type        = list(string)
   description = "Boot device order"
@@ -73,7 +79,7 @@ variable "stop_on_destroy" {
 variable "defaults" {
   type = object({
     disk = optional(object({
-      storage_id = optional(string, "local-lvm")
+      storage_id = optional(string, "ssd-standard")
     }), {})
     network = optional(object({
       bridge = optional(string, "vmbr0")

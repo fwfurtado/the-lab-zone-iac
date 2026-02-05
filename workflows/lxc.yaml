@@ -1,0 +1,18 @@
+workflows:
+  apply-all:
+    description: "Apply all infrastructure stacks"
+    steps:
+      - command: terraform apply lxc -s tailscale -auto-approve
+      - command: terraform apply lxc -s traefik -auto-approve
+
+  destroy-all:
+    description: "Destroy all infrastructure stacks"
+    steps:
+      - command: terraform destroy lxc -s tailscale -auto-approve
+      - command: terraform destroy lxc -s traefik -auto-approve
+
+  plan-all:
+    description: "Plan all infrastructure stacks"
+    steps:
+      - command: terraform plan lxc -s tailscale
+      - command: terraform plan lxc -s traefik

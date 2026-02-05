@@ -9,7 +9,7 @@ resource "talos_image_factory_schematic" "this" {
   schematic = length(var.talos_image_extensions) == 0 ? null : yamlencode({
     customization = {
       systemExtensions = {
-        officialExtensions = data.talos_image_factory_extensions_versions.this.extensions_info.*.name
+        officialExtensions = try(data.talos_image_factory_extensions_versions.this.extensions_info[*].name, [])
       }
     }
   })

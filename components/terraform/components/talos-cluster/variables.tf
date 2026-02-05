@@ -11,20 +11,25 @@ variable "cluster" {
 
 variable "nodes" {
   type = list(object({
-    name           = string
-    id             = number
-    role           = string
-    cpu            = number
-    memory         = number
-    disk_size      = number
-    datastore_id   = optional(string)
-    network_bridge = optional(string)
-    ip_cidr        = string
-    started        = optional(bool)
-    on_boot        = optional(bool)
-    tags           = optional(list(string), [])
+    name            = string
+    id              = number
+    role            = string
+    cpu             = number
+    memory          = number
+    disk_size       = number
+    datastore_id    = optional(string)
+    network_bridge  = optional(string)
+    ip_cidr         = string
+    static_ip_cidr  = optional(string)
+    started         = optional(bool)
+    on_boot         = optional(bool)
+    tags            = optional(list(string), [])
   }))
-  description = "The Talos nodes configuration"
+  description = <<-EOD
+    Talos nodes. ip_cidr is the address used to connect (and the expected address after config).
+    Set static_ip_cidr when the node currently has a different IP (e.g. DHCP): use ip_cidr for
+    the current/bootstrap IP and static_ip_cidr for the static IP to configure in Talos.
+  EOD
 
   validation {
     condition     = length([for node in var.nodes : node if node.role == "controlplane"]) > 0
@@ -32,10 +37,28 @@ variable "nodes" {
   }
 }
 
+variable "node_network_gateway" {
+  type        = string
+  description = "Default gateway for node static network config (e.g. 10.40.0.1). Required for static IP patch."
+  default     = "10.40.0.1"
+}
+
+variable "node_network_interface" {
+  type        = string
+  description = "Interface name for static network config (e.g. eth0)"
+  default     = "eth0"
+}
+
 variable "operating_system_type" {
   type        = string
   description = "The Proxmox OS type for the VM"
   default     = "l26"
+}
+
+variable "vm_cpu_type" {
+  type        = string
+  description = "Proxmox/QEMU CPU type for VMs. Talos 1.7+ requires x86-64 microarchitecture level 2+ (e.g. x86-64-v2-AES); qemu64 is level 1."
+  default     = "x86-64-v2-AES"
 }
 
 variable "talos_config_patches" {

@@ -14,3 +14,17 @@ output "talos_cluster" {
   }
   sensitive = true
 }
+
+
+output "talos_image_factory_schematic" {
+  value = talos_image_factory_schematic.this.schematic
+}
+
+output "talos_image_factory_urls" {
+  value = data.talos_image_factory_urls.this.urls
+}
+
+output "kubeconfig_raw" {
+  value = talos_cluster_kubeconfig.this.kubeconfig_raw
+  sensitive = true
+}

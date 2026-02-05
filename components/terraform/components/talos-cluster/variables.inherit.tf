@@ -8,11 +8,6 @@ variable "proxmox_node_name" {
   description = "The name of the Proxmox node"
 }
 
-variable "defaults" {
-  type        = any
-  description = "Default values for VMs"
-}
-
 variable "cluster_endpoint" {
   type        = string
   description = "Talos cluster endpoint URL (defaults to first controlplane node)"
