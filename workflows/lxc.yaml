@@ -16,3 +16,15 @@ workflows:
     steps:
       - command: terraform plan lxc -s tailscale
       - command: terraform plan lxc -s traefik
+
+  validate-all:
+    description: "Validate all infrastructure stacks"
+    steps:
+      - command: terraform validate lxc -s tailscale
+      - command: terraform validate lxc -s traefik
+
+  lint-all:
+    description: "Lint all infrastructure stacks"
+    steps:
+      - command: terraform fmt -check=true lxc -s tailscale
+      - command: terraform fmt -check=true lxc -s traefik

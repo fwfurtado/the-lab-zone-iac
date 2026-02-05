@@ -25,11 +25,11 @@ variable "proxmox_ssh_agent" {
 
 variable "container" {
   type = object({
-    id          = number
-    hostname    = string
-    description = string
-    started     = optional(bool, true)
-    entrypoint  = optional(string)
+    id            = number
+    hostname      = string
+    description   = string
+    started       = optional(bool, true)
+    entrypoint    = optional(string)
     should_reboot = optional(bool, true)
 
     image = object({
