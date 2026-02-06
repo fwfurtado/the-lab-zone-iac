@@ -30,12 +30,23 @@ components:
             role: "controlplane"
             cpu: 4
             memory: 12288
-            disk_size: 20
+            disk_size: 100
             ip_cidr: "10.40.0.20/24"
           - name: "worker-1"
             id: 201
             role: "worker"
             cpu: 6
             memory: 16384
-            disk_size: 20
+            disk_size: 100
             ip_cidr: "10.40.0.21/24"
+          - name: "worker-2"
+            id: 202
+            role: "worker"
+            cpu: 6
+            memory: 16384
+            disk_size: 100
+            # Bootstrap: VM bootou com DHCP (10.40.0.65). ip_cidr = IP atual para Terraform
+            # conectar; static_ip_cidr = IP final a ser configurado no Talos.
+            # Após o primeiro apply bem-sucedido, volte para: ip_cidr: "10.40.0.22/24"
+            ip_cidr: "10.40.0.65/24"
+            static_ip_cidr: "10.40.0.22/24"
