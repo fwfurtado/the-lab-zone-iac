@@ -99,6 +99,13 @@ http:
         - "websecure"
       tls: {}
 
+    k8s_platform_cluster:
+      rule: "HostRegexp(`^[a-z0-9-]+\\.platform\\.the-lab\\.zone$`)"
+      service: "k8s_platform_cluster"
+      entryPoints:
+        - "websecure"
+      tls: {}
+
   services:
     proxmox:
       loadBalancer:
@@ -117,6 +124,11 @@ http:
         servers:
           - url: "https://10.40.0.1"
         serversTransport: "insecureTransport"
+
+    k8s_platform_cluster:
+      loadBalancer:
+        servers:
+          - url: "http://10.40.2.1"
 
   serversTransports:
     insecureTransport:
