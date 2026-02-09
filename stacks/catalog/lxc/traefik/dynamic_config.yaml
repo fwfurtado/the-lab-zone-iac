@@ -99,6 +99,13 @@ http:
         - "websecure"
       tls: {}
 
+    traefik:
+      rule: "Host(`traefik.infra.the-lab.zone`)"
+      service: "traefik"
+      entryPoints:
+        - "websecure"
+      tls: {}
+
     k8s_platform_cluster:
       rule: "HostRegexp(`^[a-z0-9-]+\\.platform\\.the-lab\\.zone$`)"
       service: "k8s_platform_cluster"
@@ -129,6 +136,12 @@ http:
       loadBalancer:
         servers:
           - url: "http://10.40.2.1"
+
+    traefik:
+      loadBalancer:
+        servers:
+          - url: "http://localhost:8080"
+        serversTransport: "insecureTransport"
 
   serversTransports:
     insecureTransport:
