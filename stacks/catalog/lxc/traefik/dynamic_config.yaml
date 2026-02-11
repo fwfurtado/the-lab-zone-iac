@@ -158,4 +158,4 @@ tcp:
     gitea-ssh:
       loadBalancer:
         servers:
-          - address: "10.40.0.1:22"
+          - address: "10.40.2.1:22"
