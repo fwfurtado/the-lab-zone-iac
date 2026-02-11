@@ -3,7 +3,7 @@ api:
   insecure: true
 
 log:
-  level: "INFO"
+  level: "DEBUG"
   format: "json"
 
 ping:
