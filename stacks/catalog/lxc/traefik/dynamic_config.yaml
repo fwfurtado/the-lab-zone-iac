@@ -147,3 +147,15 @@ http:
     insecureTransport:
       insecureSkipVerify: true
 
+tcp:
+  routers:
+    gitea-ssh:
+      entryPoints:
+        - "gitea-ssh"
+      rule: "HostSNI(`*`)"
+      service: "gitea-ssh"
+  services:
+    gitea-ssh:
+      loadBalancer:
+        servers:
+          - address: "10.40.0.1:22"

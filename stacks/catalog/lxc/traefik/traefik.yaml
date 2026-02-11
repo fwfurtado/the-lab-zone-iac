@@ -24,6 +24,8 @@ entryPoints:
           scheme: "https"
   websecure:
     address: ":443"
+  gitea-ssh:
+    address: ":22"
 
 certificatesResolvers:
   cloudflare:
