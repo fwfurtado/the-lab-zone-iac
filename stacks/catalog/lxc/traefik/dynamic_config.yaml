@@ -70,6 +70,19 @@ http:
             sans:
               - "*.k8s.the-lab.zone"
 
+    wildcard_web_infra:
+      rule: "Host(`_wildcard.web.the-lab.zone`)"
+      service: "noop@internal"
+      priority: 1
+      entryPoints:
+        - "websecure"
+      tls:
+        certResolver: "cloudflare"
+        domains:
+          - main: "web.the-lab.zone"
+            sans:
+              - "*.web.the-lab.zone"
+
     wildcard_root:
       rule: "Host(`_wildcard.the-lab.zone`)"
       service: "noop@internal"
@@ -114,6 +127,20 @@ http:
     garage:
       rule: "Host(`garage.infra.the-lab.zone`)"
       service: "garage"
+      entryPoints:
+        - "websecure"
+      tls: {}
+
+    garage_s3:
+      rule: "Host(`s3.infra.the-lab.zone`)"
+      service: "garage_s3"
+      entryPoints:
+        - "websecure"
+      tls: {}
+
+    garage_web:
+      rule: "HostRegexp(`^[a-z0-9-]+\\.web\\.the-lab\\.zone$`)"
+      service: "garage_web"
       entryPoints:
         - "websecure"
       tls: {}
@@ -190,6 +217,17 @@ http:
         servers:
           - url: "http://10.40.1.10:3909"
         serversTransport: "insecureTransport"
+
+    garage_s3:
+      loadBalancer:
+        servers:
+          - url: "http://10.40.1.10:3900"
+        serversTransport: "insecureTransport"
+
+    garage_web:
+      loadBalancer:
+        servers:
+          - url: "http://10.40.1.10:3902"
 
     gitea:
       loadBalancer:
