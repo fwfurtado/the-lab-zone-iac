@@ -118,6 +118,13 @@ http:
         - "websecure"
       tls: {}
 
+    git:
+      rule: "Host(`git.infra.the-lab.zone`)"
+      service: "gitea"
+      entryPoints:
+        - "websecure"
+      tls: {}
+
     auth:
       rule: "Host(`auth.infra.the-lab.zone`)"
       service: "authentik"
@@ -134,6 +141,12 @@ http:
         - "websecure"
       tls: {}
 
+    grafana:
+      rule: "Host(`grafana.infra.the-lab.zone`)"
+      service: "grafana"
+      entryPoints:
+        - "websecure"
+      tls: {}
 
     k8s_platform_cluster:
       rule: "HostRegexp(`^[a-z0-9-]+\\.platform\\.the-lab\\.zone$`)"
@@ -178,6 +191,12 @@ http:
           - url: "http://10.40.1.10:3909"
         serversTransport: "insecureTransport"
 
+    gitea:
+      loadBalancer:
+        servers:
+          - url: "http://10.40.1.20"
+        serversTransport: "insecureTransport"
+
     zot:
       loadBalancer:
         servers:
@@ -188,6 +207,12 @@ http:
       loadBalancer:
         servers:
           - url: "http://10.40.1.40"
+
+    grafana:
+      loadBalancer:
+        servers:
+          - url: "http://10.40.1.50"
+        serversTransport: "insecureTransport"
 
   serversTransports:
     insecureTransport:
@@ -204,4 +229,4 @@ tcp:
     gitea-ssh:
       loadBalancer:
         servers:
-          - address: "10.40.2.1:22"
+          - address: "10.40.1.20:2222"
