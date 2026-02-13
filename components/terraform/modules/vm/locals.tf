@@ -23,6 +23,7 @@ locals {
       network = {
         bridge  = coalesce(try(vm.network_bridge, null), try(var.defaults.network.bridge, null), "vmbr0")
         ip_cidr = try(vm.ip_cidr, null)
+        gateway = try(vm.gateway, null)
       }
       tags = sort(distinct(concat(
         local.group.tags,

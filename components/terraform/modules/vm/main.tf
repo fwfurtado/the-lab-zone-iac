@@ -32,6 +32,19 @@ resource "proxmox_virtual_environment_vm" "nodes" {
     bridge = each.value.network.bridge
   }
 
+  dynamic "initialization" {
+    for_each = each.value.network.ip_cidr != null ? [1] : []
+    content {
+      interface = "ide0"
+      ip_config {
+        ipv4 {
+          address = each.value.network.ip_cidr
+          gateway = each.value.network.gateway
+        }
+      }
+    }
+  }
+
   operating_system {
     type = var.operating_system_type
   }
@@ -39,7 +52,6 @@ resource "proxmox_virtual_environment_vm" "nodes" {
   dynamic "cdrom" {
     for_each = local.cdrom_enabled ? [local.cdrom] : []
     content {
-      enabled   = true
       file_id   = cdrom.value.file_id
       interface = cdrom.value.interface
     }

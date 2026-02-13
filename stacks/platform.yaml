@@ -15,7 +15,7 @@ components:
         talos_image_extensions:
           - "siderolabs/iscsi-tools"
           - "siderolabs/qemu-guest-agent"
-        cluster_endpoint: "https://10.40.0.20:6443"
+        cluster_endpoint: "https://10.40.1.70:6443"
         cluster:
           name: "platform"
           description: "Talos platform cluster"
@@ -31,28 +31,28 @@ components:
             cpu: 4
             memory: 16384
             disk_size: 100
-            ip_cidr: "10.40.0.20/24"
+            ip_cidr: "10.40.1.70/24"
           - name: "worker-1"
             id: 201
             role: "worker"
             cpu: 6
             memory: 16384
             disk_size: 100
-            ip_cidr: "10.40.0.21/24"
+            ip_cidr: "10.40.1.71/24"
           - name: "worker-2"
             id: 202
             role: "worker"
             cpu: 6
             memory: 16384
             disk_size: 100
-            ip_cidr: "10.40.0.22/24"
+            ip_cidr: "10.40.1.72/24"
           - name: "worker-3"
             id: 203
             role: "worker"
             cpu: 6
             memory: 16384
             disk_size: 100
-            ip_cidr: "10.40.0.23/24"
+            ip_cidr: "10.40.1.73/24"
         controlplane_config_patches:
           - |
             cluster:

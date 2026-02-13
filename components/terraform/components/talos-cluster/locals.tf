@@ -21,6 +21,7 @@ locals {
       datastore_id    = try(node.datastore_id, null)
       network_bridge  = try(node.network_bridge, null)
       ip_cidr         = node.ip_cidr
+      gateway         = var.node_network_gateway
       static_ip_cidr  = coalesce(try(node.static_ip_cidr, null), node.ip_cidr)
       started         = try(node.started, null)
       on_boot         = try(node.on_boot, null)
@@ -40,11 +41,14 @@ locals {
         network = {
           interfaces = [
             {
-              interface = var.node_network_interface
+              deviceSelector = {
+                physical = true
+              }
               addresses = [node.static_ip_cidr]
               routes = [
                 { network = "0.0.0.0/0", gateway = var.node_network_gateway }
               ]
+              dhcp = false
             }
           ]
         }

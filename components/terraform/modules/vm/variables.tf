@@ -24,6 +24,7 @@ variable "vms" {
     datastore_id   = optional(string)
     network_bridge = optional(string)
     ip_cidr        = optional(string)
+    gateway        = optional(string)
     started        = optional(bool)
     on_boot        = optional(bool)
     tags           = optional(list(string), [])
