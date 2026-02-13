@@ -31,28 +31,28 @@ components:
             cpu: 4
             memory: 16384
             disk_size: 100
-            ip_cidr: "10.40.1.70/24"
+            ip_cidr: "10.40.1.70/21"
           - name: "worker-1"
             id: 201
             role: "worker"
             cpu: 6
             memory: 16384
             disk_size: 100
-            ip_cidr: "10.40.1.71/24"
+            ip_cidr: "10.40.1.71/21"
           - name: "worker-2"
             id: 202
             role: "worker"
             cpu: 6
             memory: 16384
             disk_size: 100
-            ip_cidr: "10.40.1.72/24"
+            ip_cidr: "10.40.1.72/21"
           - name: "worker-3"
             id: 203
             role: "worker"
             cpu: 6
             memory: 16384
             disk_size: 100
-            ip_cidr: "10.40.1.73/24"
+            ip_cidr: "10.40.1.73/21"
         controlplane_config_patches:
           - |
             cluster:
