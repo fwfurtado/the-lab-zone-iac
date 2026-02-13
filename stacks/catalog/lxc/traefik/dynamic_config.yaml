@@ -1,4 +1,9 @@
 http:
+  middlewares:
+    authentik-proto-headers:
+      headers:
+        customRequestHeaders:
+          X-Forwarded-Proto: "https"
   routers:
     wildcard_infra:
       rule: "Host(`_wildcard.infra.the-lab.zone`)"
@@ -106,6 +111,30 @@ http:
         - "websecure"
       tls: {}
 
+    garage:
+      rule: "Host(`garage.infra.the-lab.zone`)"
+      service: "garage"
+      entryPoints:
+        - "websecure"
+      tls: {}
+
+    auth:
+      rule: "Host(`auth.infra.the-lab.zone`)"
+      service: "authentik"
+      entryPoints:
+        - "websecure"
+      tls: {}
+      middlewares:
+        - "authentik-proto-headers"
+
+    registry:
+      rule: "Host(`registry.infra.the-lab.zone`)"
+      service: "zot"
+      entryPoints:
+        - "websecure"
+      tls: {}
+
+
     k8s_platform_cluster:
       rule: "HostRegexp(`^[a-z0-9-]+\\.platform\\.the-lab\\.zone$`)"
       service: "k8s_platform_cluster"
@@ -142,6 +171,23 @@ http:
         servers:
           - url: "http://localhost:8080"
         serversTransport: "insecureTransport"
+
+    garage:
+      loadBalancer:
+        servers:
+          - url: "http://10.40.1.10:3909"
+        serversTransport: "insecureTransport"
+
+    zot:
+      loadBalancer:
+        servers:
+          - url: "http://10.40.1.30:5000"
+        serversTransport: "insecureTransport"
+
+    authentik:
+      loadBalancer:
+        servers:
+          - url: "http://10.40.1.40"
 
   serversTransports:
     insecureTransport:
