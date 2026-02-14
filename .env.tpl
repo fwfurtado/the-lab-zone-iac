@@ -14,3 +14,6 @@ export TF_TOKEN_app_terraform_io={{ op://development/Terraform/api token/homelab
 export TS_AUTHKEY={{ op://development/Tailscale/Auth Key }}
 
 export CLOUDFLARE_API_KEY={{ op://development/Cloudflare/the-lab.zone }}
+
+export TF_VAR_image_registry_username={{ op://homelab/Zot K8s/username}}
+export TF_VAR_image_registry_password={{ op://homelab/Zot K8s/password}}

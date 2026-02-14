@@ -33,12 +33,14 @@ resource "talos_machine_configuration_apply" "nodes" {
   client_configuration        = talos_machine_secrets.this.client_configuration
   machine_configuration_input = each.value.role == "controlplane" ? data.talos_machine_configuration.controlplane.machine_configuration : data.talos_machine_configuration.worker.machine_configuration
   node                        = each.value.ip
-  config_patches = concat(
+  config_patches = compact(concat(
     var.talos_config_patches,
     [local.install_disk_patch],
+    [local.registry_config_patch],
     try([local.network_patches[each.key]], []),
     each.value.role == "controlplane" ? var.controlplane_config_patches : var.worker_config_patches
-  )
+  ))
+
 
   depends_on = [module.vm]
 }

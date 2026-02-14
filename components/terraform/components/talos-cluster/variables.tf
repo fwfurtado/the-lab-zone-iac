@@ -130,3 +130,16 @@ variable "kubernetes_version" {
   description = "Kubernetes version for generated machine configuration"
   default     = null
 }
+
+variable "image_registry_username" {
+  type        = string
+  description = "Username for image registry k8s user"
+  default     = "k8s"
+}
+
+variable "image_registry_password" {
+  type        = string
+  description = "Password for image registry k8s user"
+  sensitive   = true
+  default     = ""
+}

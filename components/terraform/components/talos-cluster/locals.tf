@@ -83,4 +83,41 @@ locals {
   requested_extensions = distinct(var.talos_image_extensions)
   resolved_extensions  = length(local.requested_extensions) == 0 ? [] : try(distinct(data.talos_image_factory_extensions_versions.this.extensions_info[*].name), [])
   missing_extensions   = setsubtract(toset(local.requested_extensions), toset(local.resolved_extensions))
+
+   registry_config_patch = var.image_registry_password != "" ? yamlencode({
+    machine = {
+      registries = {
+        mirrors = {
+          "docker.io" = {
+            endpoints    = ["http://10.40.1.30:5000/v2/docker"]
+            overridePath = true
+          }
+          "ghcr.io" = {
+            endpoints    = ["http://10.40.1.30:5000/v2/ghcr"]
+            overridePath = true
+          }
+          "registry.k8s.io" = {
+            endpoints    = ["http://10.40.1.30:5000/v2/k8s"]
+            overridePath = true
+          }
+          "quay.io" = {
+            endpoints    = ["http://10.40.1.30:5000/v2/quay"]
+            overridePath = true
+          }
+          "docker.gitea.com" = {
+            endpoints    = ["http://10.40.1.30:5000/v2/gitea"]
+            overridePath = true
+          }
+        }
+        config = {
+          "10.40.1.30:5000" = {
+            auth = {
+              username = var.image_registry_username
+              password = var.image_registry_password
+            }
+          }
+        }
+      }
+    }
+  }) : ""
 }
