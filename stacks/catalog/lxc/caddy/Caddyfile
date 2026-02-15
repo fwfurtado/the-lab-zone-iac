@@ -1,0 +1,119 @@
+{
+	email fwfurtado@gmail.com
+
+	admin 0.0.0.0:2019
+
+	metrics {
+		per_host
+	}
+
+	# ── Shared certificate storage via Garage S3 ──
+	storage s3 {
+		host "{env.GARAGE_ENDPOINT}"
+		bucket "{env.GARAGE_BUCKET}"
+		access_id "{env.GARAGE_ACCESS_KEY}"
+		secret_key "{env.GARAGE_SECRET_KEY}"
+		prefix "certs"
+		insecure true
+	}
+
+	# ── ACME via Cloudflare DNS challenge ──
+	acme_dns cloudflare {env.CF_API_TOKEN}
+
+	# ── Layer4 for SSH passthrough ──
+	layer4 {
+		:22 {
+			route {
+				proxy "{env.GITEA_SSH_BACKEND}"
+			}
+		}
+	}
+
+	# ── Logging ──
+	log {
+		level info
+		output file /var/log/caddy/access.log {
+			roll_size 100MiB
+			roll_keep 5
+		}
+		format json
+	}
+}
+
+test.infra.the-lab.zone {
+	respond "Caddy is working! Host: {http.request.host}" 200
+}
+
+# ══════════════════════════════════════════════════════════════════════════════
+# Infrastructure services (*.infra.the-lab.zone)
+# ══════════════════════════════════════════════════════════════════════════════
+
+proxmox.infra.the-lab.zone {
+	reverse_proxy https://10.40.0.200:8006 {
+		transport http {
+			tls_insecure_skip_verify
+		}
+	}
+}
+
+nas.infra.the-lab.zone {
+	reverse_proxy https://10.40.0.4 {
+		transport http {
+			tls_insecure_skip_verify
+		}
+	}
+}
+
+unifi.infra.the-lab.zone {
+	reverse_proxy https://10.40.0.1 {
+		transport http {
+			tls_insecure_skip_verify
+		}
+	}
+}
+
+traefik.infra.the-lab.zone {
+	reverse_proxy http://10.40.0.50:8080
+}
+
+garage.infra.the-lab.zone {
+	reverse_proxy http://10.40.1.10:3902
+}
+
+s3.infra.the-lab.zone {
+	reverse_proxy http://10.40.1.10:3900
+}
+
+git.infra.the-lab.zone {
+	reverse_proxy http://10.40.1.20:2222
+}
+
+auth.infra.the-lab.zone {
+	reverse_proxy http://10.40.1.40 {
+		header_up X-Forwarded-Proto "https"
+	}
+}
+
+registry.infra.the-lab.zone {
+	reverse_proxy http://10.40.1.30:5000
+}
+
+grafana.infra.the-lab.zone {
+	reverse_proxy http://10.40.1.50
+}
+
+# ══════════════════════════════════════════════════════════════════════════════
+# Garage web hosting (*.web.the-lab.zone)
+# ══════════════════════════════════════════════════════════════════════════════
+
+*.web.the-lab.zone {
+	reverse_proxy http://10.40.1.10:3902
+}
+
+# ══════════════════════════════════════════════════════════════════════════════
+# Kubernetes platform cluster (*.platform.the-lab.zone)
+# ══════════════════════════════════════════════════════════════════════════════
+
+*.platform.the-lab.zone {
+	reverse_proxy http://10.40.2.1
+}

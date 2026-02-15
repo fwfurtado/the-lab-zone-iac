@@ -1,0 +1,17 @@
+workflows:
+  caddy/apply:
+    description: "Apply the Caddy stack"
+    steps:
+      - command: terraform apply lxc -s caddy -auto-approve
+      - type: shell
+        command: >-
+          scp -P 2223 ./stacks/catalog/lxc/caddy/Caddyfile root@10.40.0.4:/mnt/paradise/the-lab-zone/stateful-apps/caddy/config/
+      - type: shell
+        command: >-
+          curl -v --max-time 10 -X POST http://10.40.1.1:2019/load -H "Content-Type: text/caddyfile" --data-binary @stacks/catalog/lxc/caddy/Caddyfile || echo "Failed to apply Caddy stack to node 1"
+      - type: shell
+        command: >-
+          curl -v --max-time 10 -X POST http://10.40.1.2:2019/load -H "Content-Type: text/caddyfile" --data-binary @stacks/catalog/lxc/caddy/Caddyfile || echo "Failed to apply Caddy stack to node 2"
+      - type: shell
+        command: >-
+          echo "Caddy stack applied"

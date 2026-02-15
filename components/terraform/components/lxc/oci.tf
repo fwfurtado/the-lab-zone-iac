@@ -1,5 +1,5 @@
 locals {
-  oci_image_file_name = "${replace(local.container.image.registry, ".", "_")}-${replace(local.container.image.repository, "/", "_")}-${local.container.image.tag}.tar"
+  oci_image_file_name = "${replace(replace(local.container.image.registry, ".", "_"), ":", "_")}-${replace(local.container.image.repository, "/", "_")}-${local.container.image.tag}.tar"
 }
 
 resource "proxmox_virtual_environment_oci_image" "this" {

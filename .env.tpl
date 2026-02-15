@@ -17,3 +17,7 @@ export CLOUDFLARE_API_KEY={{ op://development/Cloudflare/the-lab.zone }}
 
 export TF_VAR_image_registry_username={{ op://homelab/Zot K8s/username}}
 export TF_VAR_image_registry_password={{ op://homelab/Zot K8s/password}}
+
+
+export GARAGE_CADDY_ACCESS_KEY={{ op://homelab/Caddy Garage S3/access-key-id}}
+export GARAGE_CADDY_SECRET_KEY={{ op://homelab/Caddy Garage S3/secret-access-key}}
