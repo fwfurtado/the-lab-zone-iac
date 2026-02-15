@@ -20,3 +20,8 @@ export ZOT_K8S_PASSWORD={{ op://homelab/Zot K8s/password}}
 export DOCKER_REGISTRY_ADDRESS={{ op://homelab/Zot Admin/url}}
 export DOCKER_REGISTRY_USERNAME={{ op://homelab/Zot Admin/username}}
 export DOCKER_REGISTRY_PASSWORD={{ op://homelab/Zot Admin/password}}
+
+export TRUENAS_HOST={{ op://homelab/TrueNAS SSH Key/URL }}
+export TRUENAS_USERNAME={{ op://homelab/TrueNAS SSH Key/username }}
+export TRUENAS_FINGERPRINT={{ op://homelab/TrueNAS SSH Key/fingerprint }}
+export TRUENAS_PRIVATE_KEY="{{ op://homelab/TrueNAS SSH Key/private key?ssh-format=openssh}}"

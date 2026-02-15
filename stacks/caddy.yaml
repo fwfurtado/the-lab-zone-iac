@@ -7,7 +7,17 @@ components:
       metadata:
         terraform_workspace: "{{ .stack }}"
       vars:
+        truenas:
+          host: !env TRUENAS_HOST
+          username: !env TRUENAS_USERNAME
+          fingerprint: !env TRUENAS_FINGERPRINT
+          private_key: !env TRUENAS_PRIVATE_KEY
         docker:
+          provider:
+            registry_auth:
+              address: !env DOCKER_REGISTRY_ADDRESS
+              username: !env DOCKER_REGISTRY_USERNAME
+              password: !env DOCKER_REGISTRY_PASSWORD
           image:
             registry: !env DOCKER_REGISTRY_ADDRESS
             repository: "custom/caddy"

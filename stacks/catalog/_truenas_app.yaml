@@ -15,7 +15,3 @@ vars:
   docker:
     provider:
       docker_host: "unix:///var/run/docker.sock"
-      registry_auth:
-        address: !env DOCKER_REGISTRY_ADDRESS
-        username: !env DOCKER_REGISTRY_USERNAME
-        password: !env DOCKER_REGISTRY_PASSWORD

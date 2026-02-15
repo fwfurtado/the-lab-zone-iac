@@ -1,13 +1,22 @@
 provider "docker" {
-  host = var.provider_config.docker_host
-  ssh_opts = var.provider_config.ssh_opts
+  host = var.docker.provider.docker_host
+  ssh_opts = var.docker.provider.ssh_opts
 
- dynamic "registry_auth" {
-  for_each = var.provider_config.registry_auth != null ? [1] : []
-  content {
-    address = var.provider_config.registry_auth.address
-    username = var.provider_config.registry_auth.username
-    password = var.provider_config.registry_auth.password
+  registry_auth {
+    address = var.docker.provider.registry_auth.address
+    username = var.docker.provider.registry_auth.username
+    password = var.docker.provider.registry_auth.password
   }
- }
+}
+
+
+provider "truenas" {
+  host = var.truenas.host
+  auth_method = "ssh"
+
+  ssh {
+    user = var.truenas.username
+    host_key_fingerprint = var.truenas.fingerprint
+    private_key = var.truenas.private_key
+  }
 }

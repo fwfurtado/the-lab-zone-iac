@@ -1,3 +1,8 @@
+variable "stage" {
+  type = string
+  description = "The stage of the stack"
+}
+
 variable "docker" {
   type = object({
     image = object({
@@ -16,4 +21,14 @@ variable "docker" {
     }))
   })
   description = "The Docker configuration"
+}
+
+variable "truenas" {
+  type = object({
+    host = string
+    username = string
+    private_key = string
+    fingerprint = string
+  })
+  description = "The Truenas configuration"
 }
