@@ -1,3 +1,4 @@
+name: caddy
 services:
   caddy:
     image: ${image}
@@ -9,21 +10,15 @@ services:
       - "443:443/udp"  # HTTP/3
       - "22:22"         # Gitea SSH via layer4
     environment:
-      CF_API_TOKEN: "${cf_api_token}"
+      CF_API_TOKEN: "${cloudflare_api_key}"
+      GARAGE_ENDPOINT: "${garage_endpoint}"
+      GARAGE_BUCKET: "${garage_bucket}"
       GARAGE_ACCESS_KEY: "${garage_access_key}"
       GARAGE_SECRET_KEY: "${garage_secret_key}"
+      GITEA_SSH_BACKEND: "${gitea_ssh_backend}"
     volumes:
       - ${config_path}/Caddyfile:/etc/caddy/Caddyfile:ro
       - ${data_path}:/data
       - ${logs_path}:/var/log/caddy
     cap_add:
       - NET_ADMIN  # Required for layer4 module
-    networks:
-      - caddy
-
-networks:
-  caddy:
-    driver: bridge
-    ipam:
-      config:
-        - subnet: 172.30.0.0/24

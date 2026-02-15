@@ -1,17 +1,20 @@
+import:
+  - catalog/_truenas_app.yaml
+
 components:
   terraform:
-    truenas-app:
+    caddy:
       metadata:
         terraform_workspace: "{{ .stack }}"
       vars:
         docker:
           image:
-            repository: "caddy"
+            registry: !env DOCKER_REGISTRY_ADDRESS
+            repository: "custom/caddy"
             tag: "latest"
-          provider:
-            docker_host: "unix:///var/run/docker.sock"
-          context: "stacks/catalog/truenas-app/caddy"
-          dockerfile: !include.raw stacks/catalog/truenas-app/caddy/Dockerfile
-          platform: "linux/amd64"
-          build_args:
-            CADDY_VERSION: "2.10.1"
+        cloudflare_api_key: !env CLOUDFLARE_API_KEY
+        garage_endpoint: "10.40.1.10:3900"
+        garage_bucket: "caddy-certs"
+        garage_access_key: !env GARAGE_ACCESS_KEY
+        garage_secret_key: !env GARAGE_SECRET_KEY
+        gitea_ssh_backend: "10.40.1.20:22"

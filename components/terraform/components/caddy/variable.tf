@@ -14,11 +14,6 @@ variable "docker" {
         password = string
       }))
     }))
-
-    context = string
-    dockerfile = string
-    platform = string
-    build_args = optional(map(string), null)
   })
   description = "The Docker configuration"
 }

@@ -1,13 +1,13 @@
 provider "docker" {
-  host = var.provider.docker_host
-  ssh_opts = var.provider.ssh_opts
+  host = var.provider_config.docker_host
+  ssh_opts = var.provider_config.ssh_opts
 
  dynamic "registry_auth" {
-  for_each = var.provider.registry_auth != null ? [1] : []
+  for_each = var.provider_config.registry_auth != null ? [1] : []
   content {
-    address = var.provider.registry_auth.address
-    username = var.provider.registry_auth.username
-    password = var.provider.registry_auth.password
+    address = var.provider_config.registry_auth.address
+    username = var.provider_config.registry_auth.username
+    password = var.provider_config.registry_auth.password
   }
  }
 }

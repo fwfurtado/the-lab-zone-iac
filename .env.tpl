@@ -17,3 +17,8 @@ export CLOUDFLARE_API_KEY={{ op://development/Cloudflare/the-lab.zone }}
 
 export TF_VAR_image_registry_username={{ op://homelab/Zot K8s/username}}
 export TF_VAR_image_registry_password={{ op://homelab/Zot K8s/password}}
+
+
+export DOCKER_REGISTRY_ADDRESS={{ op://homelab/Zot Admin/url}}
+export DOCKER_REGISTRY_USERNAME={{ op://homelab/Zot Admin/username}}
+export DOCKER_REGISTRY_PASSWORD={{ op://homelab/Zot Admin/password}}

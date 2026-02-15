@@ -1,0 +1,21 @@
+# yaml-language-server: $schema=https://atmos.tools/schemas/atmos/atmos-manifest/1.0/atmos-manifest.json
+terraform:
+  backend_type: cloud
+  backend:
+    cloud:
+      organization: the-lab-zone
+      workspaces:
+        tags:
+          - "{{ .vars.stage }}"
+          - "{{ .stack }}"
+          - "{{ .component }}"
+
+vars:
+  stage: "infra"
+  docker:
+    provider:
+      docker_host: "unix:///var/run/docker.sock"
+      registry_auth:
+        address: !env DOCKER_REGISTRY_ADDRESS
+        username: !env DOCKER_REGISTRY_USERNAME
+        password: !env DOCKER_REGISTRY_PASSWORD

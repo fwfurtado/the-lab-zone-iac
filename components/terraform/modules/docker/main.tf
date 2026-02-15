@@ -5,14 +5,9 @@ resource "docker_image" "this" {
     context    = var.context
     dockerfile = var.dockerfile
     platform   = var.platform
+    builder = null
 
-    dynamic "build_arg" {
-      for_each = var.build_args
-      content {
-        name  = build_arg.key
-        value = build_arg.value
-      }
-    }
+    build_args = var.build_args
   }
 
   triggers = merge(
