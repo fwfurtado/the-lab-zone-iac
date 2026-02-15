@@ -108,6 +108,10 @@ locals {
             endpoints    = ["http://10.40.1.30:5000/v2/gitea"]
             overridePath = true
           }
+          "ecr-public.aws.com" = {
+            endpoints    = ["http://10.40.1.30:5000/v2/ecr"]
+            overridePath = true
+          }
         }
         config = {
           "10.40.1.30:5000" = {
