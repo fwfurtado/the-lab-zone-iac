@@ -1,0 +1,43 @@
+# yaml-language-server: $schema=https://atmos.tools/schemas/atmos/atmos-manifest/1.0/atmos-manifest.json
+
+import:
+  - catalog/_lxc.yaml
+
+components:
+  terraform:
+    lxc:
+      component: lxc
+      metadata:
+        terraform_workspace: "{{ .stack }}"
+      vars:
+        container:
+          id: 182
+          hostname: "technitium"
+          description: "Technitium"
+          network:
+            ip_cidr: "10.40.1.82/21"
+            dns:
+              servers: ["1.1.1.1", "1.0.0.1"]
+          tags:
+            - "core"
+            - "{{ .stack }}"
+            - "{{ .component }}"
+          image:
+            repository: "technitium/dns-server"
+            tag: "latest"
+          resources:
+            cpu: 2
+            memory: 1024
+            disk:
+              size: 5
+              backup: true
+          entrypoint: "/usr/bin/dotnet /opt/technitium/dns/DnsServerApp.dll /etc/dns"
+          environment_variables:
+            DNS_SERVER_DOMAIN: "dns2.dns.the-lab.zone"
+            DNS_SERVER_ADMIN_PASSWORD: !env TECHNITIUM_ADMIN_PASSWORD
+            DNS_SERVER_PREFER_IPV6: "false"
+            DNS_SERVER_RECURSION: "AllowOnlyForPrivateNetworks"
+            DNS_SERVER_FORWARDERS: "1.1.1.1,1.0.0.1"
+            DNS_SERVER_LOG_USING_LOCAL_TIME: "true"
+            DNS_SERVER_WEB_SERVICE_ENABLE_HTTPS: "true"
+            DNS_SERVER_WEB_SERVICE_HTTPS_PORT: "53443"

@@ -40,10 +40,6 @@
 	}
 }
 
-test.infra.the-lab.zone {
-	respond "Caddy is working! Host: {http.request.host}" 200
-}
-
 # ══════════════════════════════════════════════════════════════════════════════
 # Infrastructure services (*.infra.the-lab.zone)
 # ══════════════════════════════════════════════════════════════════════════════
@@ -72,12 +68,8 @@ unifi.infra.the-lab.zone {
 	}
 }
 
-traefik.infra.the-lab.zone {
-	reverse_proxy http://10.40.0.50:8080
-}
-
 garage.infra.the-lab.zone {
-	reverse_proxy http://10.40.1.10:3902
+	reverse_proxy http://10.40.1.10:3909
 }
 
 s3.infra.the-lab.zone {
@@ -85,7 +77,7 @@ s3.infra.the-lab.zone {
 }
 
 git.infra.the-lab.zone {
-	reverse_proxy http://10.40.1.20:2222
+	reverse_proxy http://10.40.1.20
 }
 
 auth.infra.the-lab.zone {

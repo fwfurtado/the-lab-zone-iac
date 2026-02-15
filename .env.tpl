@@ -21,3 +21,5 @@ export TF_VAR_image_registry_password={{ op://homelab/Zot K8s/password}}
 
 export GARAGE_CADDY_ACCESS_KEY={{ op://homelab/Caddy Garage S3/access-key-id}}
 export GARAGE_CADDY_SECRET_KEY={{ op://homelab/Caddy Garage S3/secret-access-key}}
+
+export TECHNITIUM_ADMIN_PASSWORD={{ op://homelab/Technitium Admin/password }}

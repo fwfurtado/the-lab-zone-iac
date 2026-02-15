@@ -2,16 +2,22 @@ workflows:
   caddy/apply:
     description: "Apply the Caddy stack"
     steps:
+      - type: shell
+        command: >-
+          caddy fmt --overwrite stacks/catalog/lxc/caddy/Caddyfile && echo "✅ Caddyfile was successfully formatted" || echo "❌ Caddyfile was not formatted"      
       - command: terraform apply lxc -s caddy -auto-approve
       - type: shell
         command: >-
-          scp -P 2223 ./stacks/catalog/lxc/caddy/Caddyfile root@10.40.0.4:/mnt/paradise/the-lab-zone/stateful-apps/caddy/config/
+          echo -e "\n\n"
       - type: shell
         command: >-
-          curl -v --max-time 10 -X POST http://10.40.1.1:2019/load -H "Content-Type: text/caddyfile" --data-binary @stacks/catalog/lxc/caddy/Caddyfile || echo "Failed to apply Caddy stack to node 1"
+          scp -P 2223 ./stacks/catalog/lxc/caddy/Caddyfile root@10.40.0.4:/mnt/paradise/the-lab-zone/stateful-apps/caddy/config/ && echo "✅ [10.40.0.4] Caddyfile was successfully scp'ed" || echo "❌ [10.40.0.4] Failed to scp Caddyfile"
       - type: shell
         command: >-
-          curl -v --max-time 10 -X POST http://10.40.1.2:2019/load -H "Content-Type: text/caddyfile" --data-binary @stacks/catalog/lxc/caddy/Caddyfile || echo "Failed to apply Caddy stack to node 2"
+          curl -q -s --max-time 10 -X POST http://10.40.1.1:2019/load -H "Content-Type: text/caddyfile" --data-binary @stacks/catalog/lxc/caddy/Caddyfile && echo "✅ [10.40.1.1] Caddy was successfully reloaded" || echo "❌ [10.40.1.1] Failed to reload"
       - type: shell
         command: >-
-          echo "Caddy stack applied"
+          curl -q -s --max-time 10 -X POST http://10.40.1.2:2019/load -H "Content-Type: text/caddyfile" --data-binary @stacks/catalog/lxc/caddy/Caddyfile && echo "✅ [10.40.1.2] Caddy was successfully reloaded" || echo "❌ [10.40.1.2] Failed to reload"
+      - type: shell
+        command: >-
+          echo "Caddy stack reloaded"
