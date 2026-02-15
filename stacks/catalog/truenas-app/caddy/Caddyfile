@@ -1,0 +1,36 @@
+{
+	# ── Shared certificate storage via Garage S3 ──
+	storage s3 {
+		host "{env.GARAGE_ENDPOINT}"
+		bucket "{env.GARAGE_BUCKET}"
+		access_id "{env.GARAGE_ACCESS_KEY}"
+		secret_key "{env.GARAGE_SECRET_KEY}"
+		prefix "certs"
+		insecure true
+	}
+
+	# ── ACME via Cloudflare DNS challenge ──
+	acme_dns cloudflare {env.CF_API_TOKEN}
+
+	# ── Layer4 for SSH passthrough ──
+	layer4 {
+		:22 {
+			route {
+				proxy "{env.GITEA_SSH_BACKEND}"
+			}
+		}
+	}
+
+	# ── Logging ──
+	log {
+		output file /var/log/caddy/access.log {
+			roll_size 100MiB
+			roll_keep 5
+		}
+		format json
+	}
+}
+
+test.infra.the-lab.zone {
+	respond "Caddy is working! Host: {http.request.host}" 200
+}

@@ -1,0 +1,17 @@
+components:
+  terraform:
+    truenas-app:
+      metadata:
+        terraform_workspace: "{{ .stack }}"
+      vars:
+        docker:
+          image:
+            repository: "caddy"
+            tag: "latest"
+          provider:
+            docker_host: "unix:///var/run/docker.sock"
+          context: "stacks/catalog/truenas-app/caddy"
+          dockerfile: !include.raw stacks/catalog/truenas-app/caddy/Dockerfile
+          platform: "linux/amd64"
+          build_args:
+            CADDY_VERSION: "2.10.1"

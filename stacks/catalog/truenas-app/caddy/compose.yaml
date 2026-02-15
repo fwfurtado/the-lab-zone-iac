@@ -1,0 +1,29 @@
+services:
+  caddy:
+    image: ${image}
+    container_name: caddy
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"  # HTTP/3
+      - "22:22"         # Gitea SSH via layer4
+    environment:
+      CF_API_TOKEN: "${cf_api_token}"
+      GARAGE_ACCESS_KEY: "${garage_access_key}"
+      GARAGE_SECRET_KEY: "${garage_secret_key}"
+    volumes:
+      - ${config_path}/Caddyfile:/etc/caddy/Caddyfile:ro
+      - ${data_path}:/data
+      - ${logs_path}:/var/log/caddy
+    cap_add:
+      - NET_ADMIN  # Required for layer4 module
+    networks:
+      - caddy
+
+networks:
+  caddy:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.30.0.0/24
