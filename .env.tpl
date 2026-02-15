@@ -4,10 +4,8 @@ export PROXMOX_VE_INSECURE=true
 export PROXMOX_VE_SSH_USERNAME={{ op://homelab/Proxmox Terraform ssh/username }}
 export PROXMOX_VE_SSH_AGENT=true
 
-export TF_VAR_proxmox_node_name=proxmox
-export TF_VAR_proxmox_host={{ op://homelab/Proxmox Terraform ssh/URL}}
-export TF_VAR_proxmox_ssh_username={{ op://homelab/Proxmox Terraform ssh/username }}
-export TF_VAR_proxmox_ssh_agent=true
+export PROXMOX_NODE_NAME=proxmox
+export PROXMOX_SSH_HOST={{ op://homelab/Proxmox Terraform ssh/URL}}
 
 export TF_TOKEN_app_terraform_io={{ op://development/Terraform/api token/homelab-cli }}
 
@@ -15,8 +13,8 @@ export TS_AUTHKEY={{ op://development/Tailscale/Auth Key }}
 
 export CLOUDFLARE_API_KEY={{ op://development/Cloudflare/the-lab.zone }}
 
-export TF_VAR_image_registry_username={{ op://homelab/Zot K8s/username}}
-export TF_VAR_image_registry_password={{ op://homelab/Zot K8s/password}}
+export ZOT_K8S_USERNAME={{ op://homelab/Zot K8s/username}}
+export ZOT_K8S_PASSWORD={{ op://homelab/Zot K8s/password}}
 
 
 export DOCKER_REGISTRY_ADDRESS={{ op://homelab/Zot Admin/url}}

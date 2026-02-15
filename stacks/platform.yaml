@@ -9,6 +9,9 @@ components:
       metadata:
         terraform_workspace: "{{ .stack }}"
       vars:
+        proxmox_node_name: !env PROXMOX_NODE_NAME
+        image_registry_username: !env ZOT_K8S_USERNAME
+        image_registry_password: !env ZOT_K8S_PASSWORD
         talos_version: "v1.7.5"
         talos_image_platform: "nocloud"
         talos_image_architecture: "amd64"
