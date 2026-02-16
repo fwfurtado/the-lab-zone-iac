@@ -15,7 +15,7 @@ components:
           hostname: "tailscale"
           description: "Tailscale"
           network:
-            ip_cidr: "10.40.0.10/24"
+            ip_cidr: "10.40.0.10/21"
           tags:
             - "core"
             - "{{ .stack }}"
@@ -31,9 +31,9 @@ components:
           entrypoint: "/usr/local/bin/containerboot"
           environment_variables:
             TS_AUTHKEY: !env TS_AUTHKEY
-            TS_ROUTES: "10.40.0.0/24"
+            TS_ROUTES: "10.40.0.0/21"
             TS_STATE_DIR: "/var/tailscale/data"
-            TS_HOSTNAME: "tailscale-node"
+            TS_HOSTNAME: "tailscale-proxmox"
             PATH: "/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
         extra_pve_conf_lines:
           - "lxc.cgroup2.devices.allow: c 10:200 rwm"
