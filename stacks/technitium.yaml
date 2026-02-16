@@ -10,6 +10,10 @@ components:
       metadata:
         terraform_workspace: "{{ .stack }}"
       vars:
+        proxmox_node_name: !env PROXMOX_SSH_NODE_NAME
+        proxmox_host: !env PROXMOX_SSH_HOST
+        proxmox_ssh_username: !env PROXMOX_SSH_USERNAME
+        proxmox_ssh_agent: !env PROXMOX_SSH_AGENT
         container:
           id: 182
           hostname: "technitium"
@@ -25,6 +29,7 @@ components:
           image:
             repository: "technitium/dns-server"
             tag: "latest"
+            type: "debian"
           resources:
             cpu: 2
             memory: 1024
