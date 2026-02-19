@@ -32,7 +32,7 @@ components:
             type: "debian"
           resources:
             cpu: 2
-            memory: 1024
+            memory: 4096
             disk:
               size: 5
               backup: true

@@ -23,3 +23,10 @@ export GARAGE_CADDY_ACCESS_KEY={{ op://homelab/Caddy Garage S3/access-key-id}}
 export GARAGE_CADDY_SECRET_KEY={{ op://homelab/Caddy Garage S3/secret-access-key}}
 
 export TECHNITIUM_ADMIN_PASSWORD={{ op://homelab/Technitium Admin/password }}
+
+
+export TRUENAS_SSH_HOST={{ op://homelab/TrueNAS root Ssh Key/host}}
+export TRUENAS_SSH_PORT=2223
+export TRUENAS_SSH_USERNAME={{ op://homelab/TrueNAS root Ssh Key/username}}
+export TRUENAS_SSH_PRIVATE_KEY="{{ op://homelab/TrueNAS root Ssh Key/private key?ssh-format=openssh}}"
+export TRUENAS_SSH_HOST_KEY_FINGERPRINT={{ op://homelab/TrueNAS root Ssh Key/host-fingerprints/ECDSA}}

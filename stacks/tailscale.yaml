@@ -2,9 +2,38 @@
 
 import:
   - catalog/_lxc.yaml
+  - catalog/_truenas-app.yaml
 
 components:
   terraform:
+    truenas-app:
+      component: truenas-app
+      metadata:
+        terraform_workspace: "{{ .stack }}-truenas"
+      vars:
+        truenas_ssh_host: !env TRUENAS_SSH_HOST
+        truenas_ssh_port: !env TRUENAS_SSH_PORT
+        truenas_ssh_username: !env TRUENAS_SSH_USERNAME
+        truenas_ssh_host_key_fingerprint: !env TRUENAS_SSH_HOST_KEY_FINGERPRINT
+        truenas_ssh_private_key: !env TRUENAS_SSH_PRIVATE_KEY
+
+        app:
+          name: "tailscale"
+          description: "Tailscale - Self-hosted VPN service"
+
+          compose:
+            content: !include.raw stacks/catalog/truenas-app/compose/tailscale.yaml
+            vars:
+              data_path: "/mnt/paradise/the-lab-zone/stateful-apps/tailscale/data"
+              tailscale_image: "tailscale/tailscale"
+              tailscale_tag: "v1.92.5"
+              ts_authkey: !env TS_AUTHKEY
+              ts_routes: "10.40.0.0/21"
+              hostname: "tailscale-truenas"
+
+          datasets:
+            - path: "tailscale"            
+            - path: "tailscale/data"              
     lxc:
       component: lxc
       metadata:
