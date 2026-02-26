@@ -1,0 +1,14 @@
+# templates/lxc/ansible/files.yml (role/task reutilizável)
+- name: Create directories for Packer files
+  ansible.builtin.file:
+    path: "{{ item.key | dirname }}"
+    state: directory
+    mode: "0755"
+  loop: "{{ packer_files | default({}) | dict2items }}"
+
+- name: Write Packer files
+  ansible.builtin.copy:
+    content: "{{ item.value }}"
+    dest: "{{ item.key }}"
+    mode: "0644"
+  loop: "{{ packer_files | default({}) | dict2items }}"

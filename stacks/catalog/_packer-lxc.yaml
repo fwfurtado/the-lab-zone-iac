@@ -1,0 +1,17 @@
+# yaml-language-server: $schema=https://atmos.tools/schemas/atmos/atmos-manifest/1.0/atmos-manifest.json
+
+# Defaults específicos do componente Packer LXC
+components:
+  packer:
+    lxc:
+      metadata:
+        component: lxc
+      vars:
+        # Obrigatórios: devem ser sobrescritos no stack (app_name, playbook_file)
+        distro: debian
+        release: bookworm
+        arch: amd64
+        output_dir: output
+        ansible_extra_vars: {}
+        extra_packages: []
+        files: {}

@@ -6,6 +6,10 @@ components:
     deploy_run_init: true
     apply_auto_approve: false
     auto_generate_backend_file: true
+  packer:
+    base_path: "components/packer/components"
+    build_run_init: true
+    build_auto_approve: false
 
 stacks:
   base_path: "stacks"
@@ -22,11 +26,9 @@ templates:
   settings:
     enabled: true
 
-
 logs:
   file: "/dev/stderr"
   level: Info
-
 # # Integrations
 # integrations: {}
 
