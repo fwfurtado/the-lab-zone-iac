@@ -1,0 +1,26 @@
+$ORIGIN the-lab.zone.
+$TTL 3600
+
+@   IN SOA ns1.the-lab.zone. admin.the-lab.zone. (
+        2025022701 ; serial
+        3600       ; refresh
+        900        ; retry
+        604800     ; expire
+        86400      ; minimum TTL
+    )
+
+    IN NS ns1.the-lab.zone.
+
+ns1       IN A     10.40.1.83
+ingress   IN A     10.40.1.1
+
+*         IN CNAME ingress.the-lab.zone.
+
+$ORIGIN infra.the-lab.zone.
+*         IN CNAME ingress.the-lab.zone.
+
+$ORIGIN web.the-lab.zone.
+*         IN CNAME ingress.the-lab.zone.
+
+$ORIGIN platform.the-lab.zone.
+*         IN CNAME ingress.the-lab.zone.

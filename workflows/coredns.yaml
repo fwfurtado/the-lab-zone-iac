@@ -1,0 +1,8 @@
+workflows:
+  coredns/apply:
+    description: "Apply the CoreDNS stack"
+    steps:
+      - type: shell
+        command: >-
+          sudo -E atmos packer build lxc -s coredns
+      - command: terraform apply lxc -s coredns -auto-approve

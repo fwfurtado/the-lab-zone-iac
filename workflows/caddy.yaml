@@ -7,5 +7,5 @@ workflows:
           caddy fmt --overwrite stacks/catalog/lxc/caddy/Caddyfile && echo "✅ Caddyfile was successfully formatted" || echo "❌ Caddyfile was not formatted"
       - type: shell
         command: >-
-          sudo -E atmos packer build lxc -s caddy -- -force
+          sudo -E atmos packer build lxc -s caddy
       - command: terraform apply lxc -s caddy -auto-approve

@@ -1,0 +1,16 @@
+the-lab.zone {
+    file /etc/coredns/db.the-lab.zone
+    prometheus :9153
+    log
+    errors
+}
+
+. {
+    forward . 1.1.1.1 1.0.0.1
+    cache 30
+    prometheus :9153
+    log
+    errors
+    health :8080
+    ready :8181
+}

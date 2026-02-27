@@ -1,0 +1,135 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/ansible-community/ansible-lint/schemas/src/ansiblelint/f/ansible-playbook-schema.json
+---
+- hosts: localhost
+  become: true
+  vars:
+    coredns_version: "1.14.1"
+    coredns_arch: "amd64"
+  tasks:
+    - name: Download CoreDNS release
+      ansible.builtin.get_url:
+        url: "https://github.com/coredns/coredns/releases/download/v{{ coredns_version }}/coredns_{{ coredns_version }}_linux_{{ coredns_arch }}.tgz"
+        dest: /tmp/coredns.tgz
+
+    - name: Extract CoreDNS binary
+      ansible.builtin.unarchive:
+        src: /tmp/coredns.tgz
+        dest: /tmp
+        remote_src: true
+
+    - name: Install CoreDNS binary
+      ansible.builtin.copy:
+        src: /tmp/coredns
+        dest: /usr/local/bin/coredns
+        remote_src: true
+        mode: "0755"
+
+    - name: Create coredns group
+      ansible.builtin.group:
+        name: coredns
+        system: true
+
+    - name: Create coredns user
+      ansible.builtin.user:
+        name: coredns
+        group: coredns
+        system: true
+        shell: /usr/sbin/nologin
+        create_home: false
+
+    - name: Create CoreDNS config directory
+      ansible.builtin.file:
+        path: /etc/coredns
+        state: directory
+        owner: coredns
+        group: coredns
+        mode: "0755"
+
+    - name: Create CoreDNS systemd service
+      ansible.builtin.copy:
+        dest: /etc/systemd/system/coredns.service
+        mode: "0644"
+        content: |
+          [Unit]
+          Description=CoreDNS DNS Server
+          After=network.target
+
+          [Service]
+          Type=simple
+          User=coredns
+          Group=coredns
+          ExecStart=/usr/local/bin/coredns -conf /etc/coredns/Corefile
+          Restart=on-failure
+          RestartSec=5
+          LimitNOFILE=1048576
+          AmbientCapabilities=CAP_NET_BIND_SERVICE
+          CapabilityBoundingSet=CAP_NET_BIND_SERVICE
+
+          [Install]
+          WantedBy=multi-user.target
+
+    - name: Enable CoreDNS service
+      ansible.builtin.systemd:
+        name: coredns
+        enabled: true
+        daemon_reload: true
+
+    - name: Cleanup download artifacts
+      ansible.builtin.file:
+        path: "{{ item }}"
+        state: absent
+      loop:
+        - /tmp/coredns.tgz
+        - /tmp/coredns
+
+    - name: Read packer files JSON
+      ansible.builtin.command:
+        cmd: cat /tmp/packer-files.json
+      register: packer_files_raw
+      changed_when: false
+
+    - name: Parse packer files
+      ansible.builtin.set_fact:
+        packer_files: "{{ (packer_files_raw.stdout | from_json).packer_files }}"
+
+    - name: Create directories for Packer files
+      ansible.builtin.file:
+        path: "{{ item.key | dirname }}"
+        state: directory
+        owner: coredns
+        group: coredns
+        mode: "0755"
+      loop: "{{ packer_files | dict2items }}"
+
+    - name: Write Packer files (static content)
+      ansible.builtin.copy:
+        content: "{{ item.value.content }}"
+        dest: "{{ item.key }}"
+        owner: coredns
+        group: coredns
+        mode: "0644"
+        force: true
+      loop: "{{ packer_files | dict2items }}"
+      when: (item.value.args | default({}) | length) == 0
+
+    - name: Write template to temp file for rendering
+      ansible.builtin.copy:
+        content: "{{ item.value.content }}"
+        dest: "/tmp/packer-tpl-{{ item.key | hash('md5') }}.j2"
+        mode: "0644"
+        force: true
+      loop: "{{ packer_files | dict2items }}"
+      when: (item.value.args | default({}) | length) > 0
+
+    - name: Render Packer template files
+      ansible.builtin.template:
+        src: "/tmp/packer-tpl-{{ item.key | hash('md5') }}.j2"
+        dest: "{{ item.key }}"
+        owner: coredns
+        group: coredns
+        mode: "0644"
+        force: true
+      vars:
+        tpl_args: "{{ item.value.args | default({}) }}"
+      loop: "{{ packer_files | dict2items }}"
+      when: (item.value.args | default({}) | length) > 0
