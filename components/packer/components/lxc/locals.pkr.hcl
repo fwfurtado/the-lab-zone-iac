@@ -1,13 +1,8 @@
 locals {
-  rendered_files = {
-    for path, file in var.files :
-    path => templatestring(file.content, file.args)
-  }
-
-  # Serializa para JSON e passa como extra-var pro Ansible
+  # Passa os arquivos (content + args) para o Ansible renderizar com o módulo template
   ansible_files_var = length(var.files) > 0 ? [
     "--extra-vars",
-    jsonencode({ packer_files = local.rendered_files })
+    jsonencode({ packer_files = var.files })
   ] : []
 
   extra_vars_args = concat(

@@ -1,4 +1,5 @@
 # templates/lxc/ansible/files.yml (role/task reutilizável)
+# packer_files: path => { content, args }. Ansible renderiza com template quando args não for vazio.
 - name: Create directories for Packer files
   ansible.builtin.file:
     path: "{{ item.key | dirname }}"
@@ -6,9 +7,27 @@
     mode: "0755"
   loop: "{{ packer_files | default({}) | dict2items }}"
 
-- name: Write Packer files
+- name: Write Packer files (conteúdo estático)
   ansible.builtin.copy:
-    content: "{{ item.value }}"
+    content: "{{ item.value.content }}"
     dest: "{{ item.key }}"
     mode: "0644"
   loop: "{{ packer_files | default({}) | dict2items }}"
+  when: (item.value.args | default({}) | length) == 0
+
+- name: Write template to temp file for rendering
+  ansible.builtin.copy:
+    content: "{{ item.value.content }}"
+    dest: "/tmp/packer-tpl-{{ item.key | regex_replace('[^a-zA-Z0-9/]', '_') }}.j2"
+    mode: "0644"
+  loop: "{{ packer_files | default({}) | dict2items }}"
+  when: (item.value.args | default({}) | length) > 0
+
+- name: Render Packer template files
+  ansible.builtin.template:
+    src: "/tmp/packer-tpl-{{ item.key | regex_replace('[^a-zA-Z0-9/]', '_') }}.j2"
+    dest: "{{ item.key }}"
+    mode: "0644"
+  vars: "{{ item.value.args }}"
+  loop: "{{ packer_files | default({}) | dict2items }}"
+  when: (item.value.args | default({}) | length) > 0

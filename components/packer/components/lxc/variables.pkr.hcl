@@ -41,7 +41,7 @@ variable "extra_packages" {
 variable "files" {
   type = map(object({
     content = string
-    args    = optional(map(string), {})
+    args    = map(string)
   }))
   default     = {}
   description = "Arquivos a criar no container: key = path destino"
