@@ -1,9 +1,20 @@
 # yaml-language-server: $schema=https://atmos.tools/schemas/atmos/atmos-manifest/1.0/atmos-manifest.json
 
 import:
+  - catalog/_packer-lxc.yaml
   - catalog/_lxc.yaml
 
 components:
+  packer:
+    lxc:
+      vars:
+        app_name: caddy
+        files:
+          "/etc/caddy/Caddyfile":
+            source: stacks/catalog/lxc/caddy/Caddyfile
+            args:
+              cf_api_token: !env CLOUDFLARE_API_KEY
+
   terraform:
     lxc:
       component: lxc
@@ -14,6 +25,7 @@ components:
         proxmox_host: !env PROXMOX_SSH_HOST
         proxmox_ssh_username: !env PROXMOX_SSH_USERNAME
         proxmox_ssh_agent: !env PROXMOX_SSH_AGENT
+        template_file: "components/packer/components/lxc/output/caddy-debian-bookworm-template.tar.gz"
         container:
           id: 121
           hostname: "caddy"
@@ -34,14 +46,3 @@ components:
             memory: 2048
             disk:
               size: 5
-          entrypoint: "caddy run --config /etc/caddy/Caddyfile --adapter caddyfile"
-          files:
-            "/etc/caddy/Caddyfile": !include.raw stacks/catalog/lxc/caddy/Caddyfile
-          environment_variables:
-            CF_API_TOKEN: !env CLOUDFLARE_API_KEY
-            GARAGE_ENDPOINT: 10.40.1.10:3900
-            GARAGE_BUCKET: caddy
-            GARAGE_ACCESS_KEY: !env GARAGE_CADDY_ACCESS_KEY
-            GARAGE_SECRET_KEY: !env GARAGE_CADDY_SECRET_KEY
-            GITEA_SSH_BACKEND: 10.40.1.20:2222
-

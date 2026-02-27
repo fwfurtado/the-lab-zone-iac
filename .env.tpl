@@ -4,7 +4,7 @@ export PROXMOX_VE_INSECURE=true
 export PROXMOX_VE_SSH_USERNAME={{ op://homelab/Proxmox Terraform ssh/username }}
 export PROXMOX_VE_SSH_AGENT=true
 
-export PROXMOX_SSH_NODE_NAME=proxmox
+export PROXMOX_SSH_NODE_NAME=pve
 export PROXMOX_SSH_HOST={{ op://homelab/Proxmox Terraform ssh/URL}}
 export PROXMOX_SSH_USERNAME={{ op://homelab/Proxmox Terraform ssh/username }}
 export PROXMOX_SSH_AGENT=true

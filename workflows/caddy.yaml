@@ -4,20 +4,8 @@ workflows:
     steps:
       - type: shell
         command: >-
-          caddy fmt --overwrite stacks/catalog/lxc/caddy/Caddyfile && echo "✅ Caddyfile was successfully formatted" || echo "❌ Caddyfile was not formatted"      
+          caddy fmt --overwrite stacks/catalog/lxc/caddy/Caddyfile && echo "✅ Caddyfile was successfully formatted" || echo "❌ Caddyfile was not formatted"
+      - type: shell
+        command: >-
+          sudo -E atmos packer build lxc -s caddy -- -force
       - command: terraform apply lxc -s caddy -auto-approve
-      - type: shell
-        command: >-
-          echo -e "\n\n"
-      - type: shell
-        command: >-
-          scp -P 2223 ./stacks/catalog/lxc/caddy/Caddyfile root@10.40.0.4:/mnt/paradise/the-lab-zone/stateful-apps/caddy/config/ && echo "✅ [10.40.0.4] Caddyfile was successfully scp'ed" || echo "❌ [10.40.0.4] Failed to scp Caddyfile"
-      - type: shell
-        command: >-
-          curl -q -s --max-time 10 -X POST http://10.40.1.1:2019/load -H "Content-Type: text/caddyfile" --data-binary @stacks/catalog/lxc/caddy/Caddyfile && echo "✅ [10.40.1.1] Caddy was successfully reloaded" || echo "❌ [10.40.1.1] Failed to reload"
-      - type: shell
-        command: >-
-          curl -q -s --max-time 10 -X POST http://10.40.1.2:2019/load -H "Content-Type: text/caddyfile" --data-binary @stacks/catalog/lxc/caddy/Caddyfile && echo "✅ [10.40.1.2] Caddy was successfully reloaded" || echo "❌ [10.40.1.2] Failed to reload"
-      - type: shell
-        command: >-
-          echo "Caddy stack reloaded"

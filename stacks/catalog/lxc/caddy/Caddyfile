@@ -8,26 +8,26 @@
 	}
 
 	# ── Shared certificate storage via Garage S3 ──
-	storage s3 {
-		host "{env.GARAGE_ENDPOINT}"
-		bucket "{env.GARAGE_BUCKET}"
-		access_id "{env.GARAGE_ACCESS_KEY}"
-		secret_key "{env.GARAGE_SECRET_KEY}"
-		prefix "certs"
-		insecure true
-	}
+	# storage s3 {
+	# 	host "{env.GARAGE_ENDPOINT}"
+	# 	bucket "{env.GARAGE_BUCKET}"
+	# 	access_id "{env.GARAGE_ACCESS_KEY}"
+	# 	secret_key "{env.GARAGE_SECRET_KEY}"
+	# 	prefix "certs"
+	# 	insecure true
+	# }
 
 	# ── ACME via Cloudflare DNS challenge ──
-	acme_dns cloudflare {env.CF_API_TOKEN}
+	acme_dns cloudflare "{{ tpl_args.cf_api_token }}"
 
 	# ── Layer4 for SSH passthrough ──
-	layer4 {
-		:22 {
-			route {
-				proxy "{env.GITEA_SSH_BACKEND}"
-			}
-		}
-	}
+	# layer4 {
+	# 	:22 {
+	# 		route {
+	# 			proxy "10.40.1.20:2222"
+	# 		}
+	# 	}
+	# }
 
 	# ── Logging ──
 	log {

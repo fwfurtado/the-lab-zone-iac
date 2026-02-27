@@ -1,21 +1,27 @@
 locals {
-  # Passa os arquivos (content + args) para o Ansible renderizar com o módulo template
-  ansible_files_var = length(var.files) > 0 ? [
+  playbook_file = abspath("${path.root}/../../../../stacks/catalog/packer/${var.app_name}/playbook.yml")
+
+  extra_vars_args = length(var.ansible_extra_vars) > 0 ? [
     "--extra-vars",
-    jsonencode({ packer_files = var.files })
+    join(" ", [for k, v in var.ansible_extra_vars : "${k}=${v}"])
   ] : []
 
-  extra_vars_args = concat(
-    length(var.ansible_extra_vars) > 0 ? [
-      "--extra-vars",
-      join(" ", [for k, v in var.ansible_extra_vars : "${k}=${v}"])
-    ] : [],
-    local.ansible_files_var
-  )
+  resolved_files = { for dest, file in var.files : dest => {
+    content = file(abspath("${path.root}/../../../../${file.source}"))
+    args    = file.args
+  }}
+
+  packer_files_base64 = base64encode(jsonencode({ packer_files = local.resolved_files }))
+
+  write_vars_file_cmds = length(var.files) > 0 ? [
+    "echo '${local.packer_files_base64}' | base64 -d > /tmp/packer-files.json",
+  ] : []
 
   extra_packages_cmd = length(var.extra_packages) > 0 ? [
     "apt-get install -y ${join(" ", var.extra_packages)}"
   ] : []
 
-  template_filename = "${var.app_name}-${var.distro}${replace(var.release, ".", "")}-template.tar.gz"
+  write_env_vars_cmds = [for k, v in var.environment_variables : "echo '${k}=${v}' >> /etc/environment"]
+
+  template_filename = "${var.app_name}-${var.distro}-${replace(var.release, ".", "")}-template.tar.gz"
 }

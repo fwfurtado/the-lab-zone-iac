@@ -50,3 +50,6 @@ terragrunt-debug.tfvars.json
 ## Atmos ignore files ###
 **/backend.tf.json
 **/*.planfile
+
+
+components/packer/components/lxc/output/*

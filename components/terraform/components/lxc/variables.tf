@@ -23,20 +23,20 @@ variable "proxmox_ssh_agent" {
   description = "Whether to use the SSH agent"
 }
 
+variable "template_file" {
+  type        = string
+  description = "Path to a local .tar.gz LXC template built by Packer"
+}
+
 variable "container" {
   type = object({
-    id            = number
-    hostname      = string
-    description   = string
-    started       = optional(bool, true)
-    entrypoint    = optional(string)
-    should_reboot = optional(bool, true)
+    id          = number
+    hostname    = string
+    description = string
+    started     = optional(bool, true)
 
     image = object({
-      repository = string
       storage_id = optional(string)
-      registry   = optional(string)
-      tag        = optional(string)
       type       = optional(string)
     })
 
@@ -71,22 +71,16 @@ variable "container" {
       unprivileged = optional(bool)
     }))
 
-    files                 = optional(map(string), {})
-    environment_variables = optional(map(string), {})
-    tags                  = optional(list(string), [])
-
+    tags = optional(list(string), [])
   })
   description = "The container configuration"
 }
-
 
 variable "defaults" {
   type = object({
     image = optional(object({
       storage_id = optional(string, "local")
-      registry   = optional(string, "docker.io")
-      tag        = optional(string, "latest")
-      type       = optional(string, "alpine")
+      type       = optional(string, "debian")
     }), {})
     network = optional(object({
       interface_name = optional(string, "eth0")
@@ -101,14 +95,12 @@ variable "defaults" {
       nesting      = optional(bool, true)
       unprivileged = optional(bool, true)
     }), {})
-    environment_variables = optional(map(string), {})
     mount_points = optional(list(object({
       volume = string
       path   = string
       size   = string
       backup = optional(bool, false)
     })), [])
-    files = optional(map(string), {})
   })
   default = {}
 }
@@ -124,5 +116,3 @@ variable "extra_reboot_after_pve_changes" {
   description = "Whether to force a pct reboot after applying extra_pve_conf_lines"
   default     = false
 }
-
-

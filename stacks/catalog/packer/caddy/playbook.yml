@@ -1,0 +1,150 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/ansible-community/ansible-lint/schemas/src/ansiblelint/f/ansible-playbook-schema.json
+---
+# Playbook para build da imagem LXC com Caddy (Packer)
+- hosts: localhost
+  become: true
+  tasks:
+    - name: Install Caddy dependencies
+      ansible.builtin.apt:
+        name: ["apt-transport-https", "ca-certificates", "curl", "gnupg", "debian-keyring", "debian-archive-keyring"]
+        state: present
+        update_cache: true
+
+
+    - name: Download Caddy GPG key
+      ansible.builtin.get_url:
+        url: https://dl.cloudsmith.io/public/caddy/stable/gpg.key
+        dest: /tmp/caddy-stable-gpg.key
+        force: true
+
+    - name: Add Caddy GPG key
+      ansible.builtin.command:
+        cmd: "gpg --dearmor -o /usr/share/keyrings/caddy-stable-archive-keyring.gpg /tmp/caddy-stable-gpg.key"
+
+    - name: Add Caddy Repository
+      ansible.builtin.get_url:
+        url: https://dl.cloudsmith.io/public/caddy/stable/debian.deb.txt
+        dest: /etc/apt/sources.list.d/caddy-stable.list
+        mode: "0644"
+        force: true
+
+    - name: Install Caddy
+      ansible.builtin.apt:
+        name: caddy
+        state: present
+        update_cache: true
+
+
+    - name: Download Go
+      ansible.builtin.get_url:
+        url: https://go.dev/dl/go1.23.6.linux-amd64.tar.gz
+        dest: /tmp/go.tar.gz
+
+    - name: Install Go
+      ansible.builtin.unarchive:
+        src: /tmp/go.tar.gz
+        dest: /usr/local
+        remote_src: true
+        creates: /usr/local/go/bin/go
+
+    - name: Install xcaddy
+      ansible.builtin.command:
+        cmd: /usr/local/go/bin/go install github.com/caddyserver/xcaddy/cmd/xcaddy@latest
+      environment:
+        GOPATH: /tmp/go
+        GOBIN: /tmp/go/bin
+        GOROOT: /usr/local/go
+      args:
+        creates: /tmp/go/bin/xcaddy
+
+    - name: Build Caddy with caddy-l4
+      ansible.builtin.command:
+        cmd: /tmp/go/bin/xcaddy build --with github.com/mholt/caddy-l4 --with github.com/caddy-dns/cloudflare --output /tmp/caddy-l4
+      environment:
+        GOPATH: /tmp/go
+        GOBIN: /tmp/go/bin
+        GOROOT: /usr/local/go
+        PATH: "/usr/local/go/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+      args:
+        creates: /tmp/caddy-l4
+
+    - name: Divert original Caddy binary
+      ansible.builtin.command:
+        cmd: dpkg-divert --divert /usr/bin/caddy.default --rename /usr/bin/caddy
+      args:
+        creates: /usr/bin/caddy.default
+
+    - name: Install custom Caddy binary
+      ansible.builtin.copy:
+        src: /tmp/caddy-l4
+        dest: /usr/bin/caddy
+        remote_src: true
+        mode: "0755"
+
+    - name: Cleanup Go and build artifacts
+      ansible.builtin.file:
+        path: "{{ item }}"
+        state: absent
+      loop:
+        - /tmp/go
+        - /tmp/go.tar.gz
+        - /tmp/caddy-l4
+        - /usr/local/go
+
+    - name: Remove Go package
+      ansible.builtin.apt:
+        name: golang
+        state: absent
+        autoremove: true
+
+
+    - name: Read packer files JSON
+      ansible.builtin.command:
+        cmd: cat /tmp/packer-files.json
+      register: packer_files_raw
+      changed_when: false
+
+    - name: Parse packer files
+      ansible.builtin.set_fact:
+        packer_files: "{{ (packer_files_raw.stdout | from_json).packer_files }}"
+
+    - name: Debug packer_files
+      ansible.builtin.debug:
+        var: packer_files
+
+    - name: Create directories for Packer files
+      ansible.builtin.file:
+        path: "{{ item.key | dirname }}"
+        state: directory
+        mode: "0755"
+      loop: "{{ packer_files | dict2items }}"
+
+    - name: Write Packer files (static content)
+      ansible.builtin.copy:
+        content: "{{ item.value.content }}"
+        dest: "{{ item.key }}"
+        mode: "0644"
+        force: true
+      loop: "{{ packer_files | dict2items }}"
+      when: (item.value.args | default({}) | length) == 0
+
+    - name: Write template to temp file for rendering
+      ansible.builtin.copy:
+        content: "{{ item.value.content }}"
+        dest: "/tmp/packer-tpl-{{ item.key | hash('md5') }}.j2"
+        mode: "0644"
+        force: true
+      loop: "{{ packer_files | dict2items }}"
+      when: (item.value.args | default({}) | length) > 0
+
+    - name: Render Packer template files
+      ansible.builtin.template:
+        src: "/tmp/packer-tpl-{{ item.key | hash('md5') }}.j2"
+        dest: "{{ item.key }}"
+        mode: "0644"
+        force: true
+      vars:
+        tpl_args: "{{ item.value.args | default({}) }}"
+      loop: "{{ packer_files | dict2items }}"
+      when: (item.value.args | default({}) | length) > 0
+

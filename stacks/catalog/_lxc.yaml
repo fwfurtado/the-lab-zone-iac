@@ -15,19 +15,15 @@ vars:
 
   defaults:
     image:
-      storage_id: "cold-storage"
-      registry: "docker.io"
-      tag: "latest"
-      type: "alpine"
+      storage_id: "local"
+      type: "debian"
     network:
       interface_name: "eth0"
       bridge: "vmbr0"
       gateway: "10.40.0.1"
       dns_servers: []
-    environment_variables: {}
     disk:
       storage_id: "ssd-standard"
     features:
       nesting: true
       unprivileged: true
-    files: {}

@@ -23,11 +23,6 @@ variable "output_dir" {
   default = "output"
 }
 
-variable "playbook_file" {
-  type        = string
-  description = "Caminho para o playbook Ansible"
-}
-
 variable "ansible_extra_vars" {
   type    = map(string)
   default = {}
@@ -38,11 +33,17 @@ variable "extra_packages" {
   default = []
 }
 
+variable "environment_variables" {
+  type        = map(string)
+  default     = {}
+  description = "Variáveis de ambiente a persistir em /etc/environment no container"
+}
+
 variable "files" {
   type = map(object({
-    content = string
-    args    = map(string)
+    source = string
+    args   = map(string)
   }))
   default     = {}
-  description = "Arquivos a criar no container: key = path destino"
+  description = "Arquivos a criar no container: key = path destino, source = caminho local do arquivo"
 }

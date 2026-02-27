@@ -7,13 +7,15 @@ build {
         "apt-get update",
         "apt-get install -y ansible",
       ],
-      local.extra_packages_cmd
+      local.extra_packages_cmd,
+      local.write_vars_file_cmds,
+      local.write_env_vars_cmds
     )
     environment_vars = ["DEBIAN_FRONTEND=noninteractive"]
   }
 
   provisioner "ansible-local" {
-    playbook_file   = var.playbook_file
+    playbook_file   = local.playbook_file
     extra_arguments = local.extra_vars_args
   }
 

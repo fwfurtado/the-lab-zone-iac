@@ -1,16 +1,11 @@
-locals {
-  oci_image_file_name = "${replace(replace(local.container.image.registry, ".", "_"), ":", "_")}-${replace(local.container.image.repository, "/", "_")}-${local.container.image.tag}.tar"
-}
-
-resource "proxmox_virtual_environment_oci_image" "this" {
-  node_name    = local.proxmox.node.name
+resource "proxmox_virtual_environment_file" "template" {
+  content_type = "vztmpl"
   datastore_id = local.container.image.storage_id
-  reference    = "${local.container.image.registry}/${local.container.image.repository}:${local.container.image.tag}"
+  node_name    = local.proxmox.node.name
+  overwrite = true
 
-  upload_timeout      = 300
-  overwrite           = false
-  overwrite_unmanaged = true
-
-  file_name = local.oci_image_file_name
+  source_file {
+    path = abspath("${path.root}/../../../../${var.template_file}")
+    checksum = filesha256(abspath("${path.root}/../../../../${var.template_file}"))
+  }
 }
-

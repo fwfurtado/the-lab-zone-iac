@@ -14,15 +14,9 @@ output "ip_cidr" {
   value = local.container.network.ip_cidr
 }
 
-output "image" {
+output "template" {
   value = {
-    id        = proxmox_virtual_environment_oci_image.this.id
-    name      = proxmox_virtual_environment_oci_image.this.reference
-    file_name = proxmox_virtual_environment_oci_image.this.file_name
+    id        = proxmox_virtual_environment_file.template.id
+    file_name = proxmox_virtual_environment_file.template.file_name
   }
 }
-
-output "entrypoint" {
-  value = local.container.entrypoint
-}
-

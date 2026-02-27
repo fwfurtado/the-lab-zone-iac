@@ -1,5 +1,5 @@
 resource "proxmox_virtual_environment_container" "this" {
-  depends_on = [proxmox_virtual_environment_oci_image.this]
+  depends_on = [proxmox_virtual_environment_file.template]
 
   description = local.container.description
   node_name   = local.proxmox.node.name
@@ -35,7 +35,7 @@ resource "proxmox_virtual_environment_container" "this" {
   }
 
   operating_system {
-    template_file_id = proxmox_virtual_environment_oci_image.this.id
+    template_file_id = proxmox_virtual_environment_file.template.id
     type             = local.container.image.type
   }
 
@@ -71,59 +71,10 @@ resource "proxmox_virtual_environment_container" "this" {
     ignore_changes = [
       started,
       console,
-      operating_system[0].template_file_id,
       network_interface[0].mac_address,
-      environment_variables,
     ]
   }
 }
-
-
-# resource "null_resource" "reboot" {
-#   depends_on = [proxmox_virtual_environment_container.this, null_resource.envs, null_resource.files, null_resource.override_entrypoint]
-#   count = local.container.should_reboot ? 1 : 0
-#   triggers = {
-#     container_id = proxmox_virtual_environment_container.this.id
-#   }
-
-#   connection {
-#     type  = "ssh"
-#     user  = local.proxmox.ssh.username
-#     host  = local.proxmox.ssh.host
-#     agent = local.proxmox.ssh.agent
-#   }
-
-#   provisioner "remote-exec" {
-#     inline = [
-#       "timeout 1m bash -c 'sudo pct reboot ${local.container.id}' || { echo \"Timeout exceeded: Reboot container '${local.container.hostname}' failed\" >&2; exit 1; }",
-#       "timeout 1m bash -c 'until sudo pct status ${local.container.id} | grep -iq running; do echo \"Still rebooting...\"; sleep 5; done' || { echo \"Timeout exceeded: Reboot container '${local.container.hostname}' failed\" >&2; exit 1; }",
-#     ]
-#   }
-# }
-
-
-
-# resource "null_resource" "force_start" {
-#   depends_on = [proxmox_virtual_environment_container.this, null_resource.envs, null_resource.files, null_resource.override_entrypoint]
-#   count = local.container.started ? 0 : 1
-#   triggers = {
-#     container_id = proxmox_virtual_environment_container.this.id
-#   }
-
-#   connection {
-#     type  = "ssh"
-#     user  = local.proxmox.ssh.username
-#     host  = local.proxmox.ssh.host
-#     agent = local.proxmox.ssh.agent
-#   }
-
-#   provisioner "remote-exec" {
-#     inline = [
-#       "timeout 1m bash -c 'sudo pct start ${local.container.id}' || { echo \"Timeout exceeded: Start container '${local.container.hostname}' failed\" >&2; exit 1; }",
-#       "timeout 1m bash -c 'until sudo pct status ${local.container.id} | grep -iq running; do echo \"Still starting...\"; sleep 5; done' || { echo \"Timeout exceeded: Start container '${local.container.hostname}' failed\" >&2; exit 1; }",
-#     ]
-#   }
-# }
 
 resource "null_resource" "extra_pve_conf" {
   count = length(var.extra_pve_conf_lines) > 0 ? 1 : 0
@@ -149,5 +100,3 @@ resource "null_resource" "extra_pve_conf" {
     )
   }
 }
-
-

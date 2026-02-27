@@ -11,21 +11,15 @@ locals {
     }
   }
 
-  # Merge dos valores do container com os defaults
   container = {
-    id            = var.container.id
-    hostname      = var.container.hostname
-    description   = var.container.description
-    entrypoint    = var.container.entrypoint
-    started       = var.container.started
-    should_reboot = var.container.should_reboot
+    id          = var.container.id
+    hostname    = var.container.hostname
+    description = var.container.description
+    started     = var.container.started
 
     image = {
-      repository = var.container.image.repository
       storage_id = coalesce(var.container.image.storage_id, var.defaults.image.storage_id, "local")
-      registry   = coalesce(var.container.image.registry, var.defaults.image.registry, "docker.io")
-      tag        = coalesce(var.container.image.tag, var.defaults.image.tag, "latest")
-      type       = coalesce(var.container.image.type, var.defaults.image.type, "alpine")
+      type       = coalesce(var.container.image.type, var.defaults.image.type, "debian")
     }
 
     resources = {
@@ -52,10 +46,7 @@ locals {
       unprivileged = coalesce(try(var.container.features.unprivileged, null), var.defaults.features.unprivileged, true)
     }
 
-    environment_variables = coalesce(var.container.environment_variables, var.defaults.environment_variables, {})
-    mount_points          = coalesce(var.container.mount_points, var.defaults.mount_points, [])
-    files                 = coalesce(var.container.files, var.defaults.files, {})
-    tags                  = sort(distinct([for t in coalesce(var.container.tags, []) : lower(t)]))
+    mount_points = coalesce(var.container.mount_points, var.defaults.mount_points, [])
+    tags         = sort(distinct([for t in coalesce(var.container.tags, []) : lower(t)]))
   }
 }
-
