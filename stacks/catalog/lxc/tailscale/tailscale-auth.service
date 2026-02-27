@@ -1,0 +1,13 @@
+[Unit]
+Description=Tailscale initial setup
+After=tailscaled.service
+Wants=tailscaled.service
+ConditionPathExists=!/var/lib/tailscale/tailscaled.state
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/tailscale up --authkey={{ tpl_args.ts_auth_key }} --hostname={{ tpl_args.ts_host }} --advertise-routes="{{ tpl_args.ts_routes }}"
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target

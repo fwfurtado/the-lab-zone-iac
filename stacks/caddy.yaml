@@ -2,7 +2,7 @@
 
 import:
   - catalog/_packer-lxc.yaml
-  - catalog/_lxc.yaml
+  - catalog/_terraform-lxc.yaml
 
 components:
   packer:

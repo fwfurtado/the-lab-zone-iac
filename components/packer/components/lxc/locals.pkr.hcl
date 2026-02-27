@@ -1,9 +1,9 @@
 locals {
   playbook_file = abspath("${path.root}/../../../../stacks/catalog/packer/${var.app_name}/playbook.yml")
 
-  extra_vars_args = length(var.ansible_extra_vars) > 0 ? [
-    "--extra-vars",
-    join(" ", [for k, v in var.ansible_extra_vars : "${k}=${v}"])
+  extra_vars_json = base64encode(jsonencode(var.ansible_extra_vars))
+  write_extra_vars_cmds = length(var.ansible_extra_vars) > 0 ? [
+    "echo '${local.extra_vars_json}' | base64 -d > /tmp/ansible-extra-vars.json",
   ] : []
 
   resolved_files = { for dest, file in var.files : dest => {

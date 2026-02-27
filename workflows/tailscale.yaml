@@ -1,0 +1,8 @@
+workflows:
+  tailscale/apply:
+    description: "Apply the Tailscale stack"
+    steps:
+      - type: shell
+        command: >-
+          sudo -E atmos packer build lxc -s tailscale
+      - command: terraform apply lxc -s tailscale -auto-approve

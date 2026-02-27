@@ -1,39 +1,19 @@
 # yaml-language-server: $schema=https://atmos.tools/schemas/atmos/atmos-manifest/1.0/atmos-manifest.json
 
 import:
-  - catalog/_lxc.yaml
-  - catalog/_truenas-app.yaml
+  - catalog/_packer-lxc.yaml
+  - catalog/_terraform-lxc.yaml
 
 components:
-  terraform:
-    truenas-app:
-      component: truenas-app
-      metadata:
-        terraform_workspace: "{{ .stack }}-truenas"
+  packer:
+    lxc:
       vars:
-        truenas_ssh_host: !env TRUENAS_SSH_HOST
-        truenas_ssh_port: !env TRUENAS_SSH_PORT
-        truenas_ssh_username: !env TRUENAS_SSH_USERNAME
-        truenas_ssh_host_key_fingerprint: !env TRUENAS_SSH_HOST_KEY_FINGERPRINT
-        truenas_ssh_private_key: !env TRUENAS_SSH_PRIVATE_KEY
-
-        app:
-          name: "tailscale"
-          description: "Tailscale - Self-hosted VPN service"
-
-          compose:
-            content: !include.raw stacks/catalog/truenas-app/compose/tailscale.yaml
-            vars:
-              data_path: "/mnt/paradise/the-lab-zone/stateful-apps/tailscale/data"
-              tailscale_image: "tailscale/tailscale"
-              tailscale_tag: "v1.92.5"
-              ts_authkey: !env TS_AUTHKEY
-              ts_routes: "10.40.0.0/21"
-              hostname: "tailscale-truenas"
-
-          datasets:
-            - path: "tailscale"            
-            - path: "tailscale/data"              
+        app_name: tailscale
+        ansible_extra_vars:
+          ts_auth_key: !env TS_AUTH_KEY
+          ts_host: "tailscale-proxmox"
+          ts_routes: "10.40.0.0/21,192.168.20.2/32"
+  terraform:
     lxc:
       component: lxc
       metadata:
@@ -43,6 +23,7 @@ components:
         proxmox_host: !env PROXMOX_SSH_HOST
         proxmox_ssh_username: !env PROXMOX_SSH_USERNAME
         proxmox_ssh_agent: !env PROXMOX_SSH_AGENT
+        template_file: "components/packer/components/lxc/output/tailscale-debian-bookworm-template.tar.gz"
         container:
           id: 100
           hostname: "tailscale"
@@ -61,13 +42,6 @@ components:
             memory: 1024
             disk:
               size: 5
-          entrypoint: "/usr/local/bin/containerboot"
-          environment_variables:
-            TS_AUTHKEY: !env TS_AUTHKEY
-            TS_ROUTES: "10.40.0.0/21"
-            TS_STATE_DIR: "/var/tailscale/data"
-            TS_HOSTNAME: "tailscale-proxmox"
-            PATH: "/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
         extra_pve_conf_lines:
           - "lxc.cgroup2.devices.allow: c 10:200 rwm"
           - "lxc.mount.entry: /dev/net/tun dev/net/tun none bind,create=file"

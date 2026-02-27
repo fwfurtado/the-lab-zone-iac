@@ -9,14 +9,14 @@ build {
       ],
       local.extra_packages_cmd,
       local.write_vars_file_cmds,
+      local.write_extra_vars_cmds,
       local.write_env_vars_cmds
     )
     environment_vars = ["DEBIAN_FRONTEND=noninteractive"]
   }
 
   provisioner "ansible-local" {
-    playbook_file   = local.playbook_file
-    extra_arguments = local.extra_vars_args
+    playbook_file = local.playbook_file
   }
 
   provisioner "shell" {
