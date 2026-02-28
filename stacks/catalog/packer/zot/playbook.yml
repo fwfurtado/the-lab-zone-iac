@@ -1,0 +1,159 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/ansible-community/ansible-lint/schemas/src/ansiblelint/f/ansible-playbook-schema.json
+---
+- hosts: localhost
+  become: true
+  vars:
+    zot_version: "2.1.11"
+    zot_arch: "amd64"
+  tasks:
+    - name: Load extra vars from Packer
+      ansible.builtin.include_vars:
+        file: /tmp/ansible-extra-vars.json
+
+    - name: Install htpasswd dependency
+      ansible.builtin.apt:
+        name: apache2-utils
+        state: present
+        update_cache: true
+
+    - name: Download Zot release
+      ansible.builtin.get_url:
+        url: "https://github.com/project-zot/zot/releases/download/v{{ zot_version }}/zot-linux-{{ zot_arch }}-minimal"
+        dest: /tmp/zot
+        mode: "0755"
+
+    - name: Install Zot binary
+      ansible.builtin.copy:
+        src: /tmp/zot
+        dest: /usr/local/bin/zot
+        remote_src: true
+        mode: "0755"
+
+    - name: Create zot group
+      ansible.builtin.group:
+        name: zot
+        system: true
+
+    - name: Create zot user
+      ansible.builtin.user:
+        name: zot
+        group: zot
+        system: true
+        shell: /usr/sbin/nologin
+        create_home: false
+
+    - name: Create Zot config directory
+      ansible.builtin.file:
+        path: /etc/zot
+        state: directory
+        owner: zot
+        group: zot
+        mode: "0755"
+
+    - name: Create Zot storage directory
+      ansible.builtin.file:
+        path: /var/lib/zot
+        state: directory
+        owner: zot
+        group: zot
+        mode: "0755"
+
+    - name: Generate htpasswd file
+      ansible.builtin.command:
+        cmd: "htpasswd -Bbn {{ zot_username }} {{ zot_password }}"
+      register: htpasswd_output
+      changed_when: false
+
+    - name: Write htpasswd file
+      ansible.builtin.copy:
+        content: "{{ htpasswd_output.stdout }}\n"
+        dest: /etc/zot/htpasswd
+        owner: zot
+        group: zot
+        mode: "0600"
+
+    - name: Create Zot systemd service
+      ansible.builtin.copy:
+        dest: /etc/systemd/system/zot.service
+        mode: "0644"
+        content: |
+          [Unit]
+          Description=Zot OCI Registry
+          After=network.target
+
+          [Service]
+          Type=simple
+          User=zot
+          Group=zot
+          ExecStart=/usr/local/bin/zot serve /etc/zot/config.json
+          Restart=on-failure
+          RestartSec=5
+          LimitNOFILE=1048576
+
+          [Install]
+          WantedBy=multi-user.target
+
+    - name: Enable Zot service
+      ansible.builtin.systemd:
+        name: zot
+        enabled: true
+        daemon_reload: true
+
+    - name: Cleanup download artifacts
+      ansible.builtin.file:
+        path: "{{ item }}"
+        state: absent
+      loop:
+        - /tmp/zot
+
+    - name: Read packer files JSON
+      ansible.builtin.command:
+        cmd: cat /tmp/packer-files.json
+      register: packer_files_raw
+      changed_when: false
+
+    - name: Parse packer files
+      ansible.builtin.set_fact:
+        packer_files: "{{ (packer_files_raw.stdout | from_json).packer_files }}"
+
+    - name: Create directories for Packer files
+      ansible.builtin.file:
+        path: "{{ item.key | dirname }}"
+        state: directory
+        owner: zot
+        group: zot
+        mode: "0755"
+      loop: "{{ packer_files | dict2items }}"
+
+    - name: Write Packer files (static content)
+      ansible.builtin.copy:
+        content: "{{ item.value.content }}"
+        dest: "{{ item.key }}"
+        owner: zot
+        group: zot
+        mode: "0644"
+        force: true
+      loop: "{{ packer_files | dict2items }}"
+      when: (item.value.args | default({}) | length) == 0
+
+    - name: Write template to temp file for rendering
+      ansible.builtin.copy:
+        content: "{{ item.value.content }}"
+        dest: "/tmp/packer-tpl-{{ item.key | hash('md5') }}.j2"
+        mode: "0644"
+        force: true
+      loop: "{{ packer_files | dict2items }}"
+      when: (item.value.args | default({}) | length) > 0
+
+    - name: Render Packer template files
+      ansible.builtin.template:
+        src: "/tmp/packer-tpl-{{ item.key | hash('md5') }}.j2"
+        dest: "{{ item.key }}"
+        owner: zot
+        group: zot
+        mode: "0644"
+        force: true
+      vars:
+        tpl_args: "{{ item.value.args | default({}) }}"
+      loop: "{{ packer_files | dict2items }}"
+      when: (item.value.args | default({}) | length) > 0

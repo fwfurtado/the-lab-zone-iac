@@ -1,0 +1,50 @@
+# yaml-language-server: $schema=https://atmos.tools/schemas/atmos/atmos-manifest/1.0/atmos-manifest.json
+
+import:
+  - catalog/_packer-lxc.yaml
+  - catalog/_terraform-lxc.yaml
+
+components:
+  packer:
+    lxc:
+      vars:
+        app_name: zot
+        ansible_extra_vars:
+          zot_username: !env ZOT_IMAGE_REGISTRY_USERNAME
+          zot_password: !env ZOT_IMAGE_REGISTRY_PASSWORD
+        files:
+          "/etc/zot/config.json":
+            source: stacks/catalog/lxc/zot/config.json
+            args: {}
+
+  terraform:
+    lxc:
+      component: lxc
+      metadata:
+        terraform_workspace: "{{ .stack }}"
+      vars:
+        proxmox_node_name: !env PROXMOX_SSH_NODE_NAME
+        proxmox_host: !env PROXMOX_SSH_HOST
+        proxmox_ssh_username: !env PROXMOX_SSH_USERNAME
+        proxmox_ssh_agent: !env PROXMOX_SSH_AGENT
+        template_file: "components/packer/components/lxc/output/zot-debian-bookworm-template.tar.gz"
+        container:
+          id: 130
+          hostname: "zot"
+          description: "Zot OCI Registry"
+          network:
+            ip_cidr: "10.40.1.30/21"
+            dns:
+              servers: ["1.1.1.1", "1.0.0.1"]
+          tags:
+            - "core"
+            - "{{ .stack }}"
+            - "{{ .component }}"
+          image:
+            repository: "ghcr.io/project-zot/zot-linux-amd64"
+            tag: "latest"
+          resources:
+            cpu: 2
+            memory: 2048
+            disk:
+              size: 50

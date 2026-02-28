@@ -1,0 +1,8 @@
+workflows:
+  zot/apply:
+    description: "Apply the Zot stack"
+    steps:
+      - type: shell
+        command: >-
+          sudo -E atmos packer build lxc -s zot
+      - command: terraform apply lxc -s zot -auto-approve
