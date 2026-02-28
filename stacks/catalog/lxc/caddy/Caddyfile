@@ -81,9 +81,7 @@ git.infra.the-lab.zone {
 }
 
 auth.infra.the-lab.zone {
-	reverse_proxy http://10.40.1.40 {
-		header_up X-Forwarded-Proto "https"
-	}
+	reverse_proxy http://10.40.1.4:9091
 }
 
 registry.infra.the-lab.zone {

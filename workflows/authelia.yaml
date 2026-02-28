@@ -1,0 +1,8 @@
+workflows:
+  authelia/apply:
+    description: "Apply the Authelia stack"
+    steps:
+      - type: shell
+        command: >-
+          sudo -E atmos packer build lxc -s authelia
+      - command: terraform apply lxc -s authelia -auto-approve

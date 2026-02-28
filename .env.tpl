@@ -24,6 +24,10 @@ export GARAGE_CADDY_SECRET_KEY={{ op://homelab/Caddy Garage S3/secret-access-key
 
 export TECHNITIUM_ADMIN_PASSWORD={{ op://homelab/Technitium Admin/password }}
 
+export AUTHELIA_JWT_SECRET={{ op://homelab/Authelia/jwt_secret }}
+export AUTHELIA_SESSION_SECRET={{ op://homelab/Authelia/session_secret }}
+export AUTHELIA_STORAGE_ENCRYPTION_KEY={{ op://homelab/Authelia/storage_encryption_key }}
+
 
 export TRUENAS_SSH_HOST={{ op://homelab/TrueNAS root Ssh Key/host}}
 export TRUENAS_SSH_PORT=2223

@@ -1,0 +1,137 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/ansible-community/ansible-lint/schemas/src/ansiblelint/f/ansible-playbook-schema.json
+---
+- hosts: localhost
+  become: true
+  tasks:
+    - name: Install dependencies
+      ansible.builtin.apt:
+        name: ["apt-transport-https", "ca-certificates", "curl", "gnupg"]
+        state: present
+        update_cache: true
+
+    - name: Download Authelia GPG key
+      ansible.builtin.get_url:
+        url: https://www.authelia.com/keys/authelia-security.gpg
+        dest: /usr/share/keyrings/authelia-security.gpg
+        mode: "0644"
+        force: true
+
+    - name: Add Authelia repository
+      ansible.builtin.copy:
+        dest: /etc/apt/sources.list.d/authelia.list
+        mode: "0644"
+        content: "deb [arch=amd64 signed-by=/usr/share/keyrings/authelia-security.gpg] https://apt.authelia.com stable main\n"
+
+    - name: Install Authelia
+      ansible.builtin.apt:
+        name: authelia
+        state: present
+        update_cache: true
+
+    - name: Create authelia group
+      ansible.builtin.group:
+        name: authelia
+        system: true
+
+    - name: Create authelia user
+      ansible.builtin.user:
+        name: authelia
+        group: authelia
+        system: true
+        shell: /usr/sbin/nologin
+        create_home: false
+
+    - name: Create Authelia config directory
+      ansible.builtin.file:
+        path: /etc/authelia
+        state: directory
+        owner: authelia
+        group: authelia
+        mode: "0750"
+
+    - name: Create Authelia data directory
+      ansible.builtin.file:
+        path: /var/lib/authelia
+        state: directory
+        owner: authelia
+        group: authelia
+        mode: "0750"
+
+    - name: Create Authelia systemd service
+      ansible.builtin.copy:
+        dest: /etc/systemd/system/authelia.service
+        mode: "0644"
+        content: |
+          [Unit]
+          Description=Authelia Authentication Server
+          After=network.target
+
+          [Service]
+          Type=simple
+          User=authelia
+          Group=authelia
+          ExecStart=/usr/bin/authelia --config /etc/authelia/configuration.yml
+          Restart=on-failure
+          RestartSec=5
+          LimitNOFILE=1048576
+
+          [Install]
+          WantedBy=multi-user.target
+
+    - name: Enable Authelia service
+      ansible.builtin.systemd:
+        name: authelia
+        enabled: true
+        daemon_reload: true
+
+    - name: Read packer files JSON
+      ansible.builtin.command:
+        cmd: cat /tmp/packer-files.json
+      register: packer_files_raw
+      changed_when: false
+
+    - name: Parse packer files
+      ansible.builtin.set_fact:
+        packer_files: "{{ (packer_files_raw.stdout | from_json).packer_files }}"
+
+    - name: Create directories for Packer files
+      ansible.builtin.file:
+        path: "{{ item.key | dirname }}"
+        state: directory
+        owner: authelia
+        group: authelia
+        mode: "0750"
+      loop: "{{ packer_files | dict2items }}"
+
+    - name: Write Packer files (static content)
+      ansible.builtin.copy:
+        content: "{{ item.value.content }}"
+        dest: "{{ item.key }}"
+        owner: authelia
+        group: authelia
+        mode: "0640"
+        force: true
+      loop: "{{ packer_files | dict2items }}"
+      when: (item.value.args | default({}) | length) == 0
+
+    - name: Write template to temp file for rendering
+      ansible.builtin.copy:
+        content: "{{ item.value.content }}"
+        dest: "/tmp/packer-tpl-{{ item.key | hash('md5') }}.j2"
+        mode: "0644"
+        force: true
+      loop: "{{ packer_files | dict2items }}"
+      when: (item.value.args | default({}) | length) > 0
+
+    - name: Render Packer template files
+      ansible.builtin.template:
+        src: "/tmp/packer-tpl-{{ item.key | hash('md5') }}.j2"
+        dest: "{{ item.key }}"
+        owner: authelia
+        group: authelia
+        mode: "0640"
+        force: true
+      vars:
+        tpl_args: "{{ item.value.args | default({}) }}"
+      loop: "{{ packer_files | dict2items }}"
+      when: (item.value.args | default({}) | length) > 0

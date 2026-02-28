@@ -1,0 +1,44 @@
+---
+server:
+  address: "tcp://:9091"
+
+telemetry:
+  metrics:
+    enabled: true
+    address: "tcp://:9959"
+
+log:
+  level: info
+
+identity_validation:
+  reset_password:
+    jwt_secret: "{{ tpl_args.jwt_secret }}"
+
+authentication_backend:
+  file:
+    path: /etc/authelia/users_database.yml
+    password:
+      algorithm: argon2id
+      iterations: 3
+      memory: 65536
+      parallelism: 4
+      salt_length: 16
+      key_length: 32
+
+session:
+  secret: "{{ tpl_args.session_secret }}"
+  cookies:
+    - domain: the-lab.zone
+      authelia_url: https://auth.infra.the-lab.zone
+
+storage:
+  encryption_key: "{{ tpl_args.storage_encryption_key }}"
+  local:
+    path: /var/lib/authelia/db.sqlite3
+
+access_control:
+  default_policy: one_factor
+
+notifier:
+  filesystem:
+    filename: /var/lib/authelia/notification.txt

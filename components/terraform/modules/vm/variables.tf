@@ -80,7 +80,7 @@ variable "stop_on_destroy" {
 variable "defaults" {
   type = object({
     disk = optional(object({
-      storage_id = optional(string, "ssd-standard")
+      storage_id = optional(string, "nvme-fast")
     }), {})
     network = optional(object({
       bridge = optional(string, "vmbr0")
