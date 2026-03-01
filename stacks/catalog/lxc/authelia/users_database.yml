@@ -4,6 +4,6 @@ users:
     disabled: false
     displayname: "Fernando Furtado"
     email: fwfurtado@gmail.com
-    password: "$argon2id$v=19$m=65536,t=3,p=4$vbOrpbdR4YTXI8ujio3p2w$IuVJXu6zML/HcZVshZNrCbiMzgIn05jx9bAeh0pDrNM"
+    password: "{{ tpl_args.authelia_password_hash }}"
     groups:
       - admins

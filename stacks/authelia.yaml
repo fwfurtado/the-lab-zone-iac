@@ -18,7 +18,8 @@ components:
               storage_encryption_key: !env AUTHELIA_STORAGE_ENCRYPTION_KEY
           "/etc/authelia/users_database.yml":
             source: stacks/catalog/lxc/authelia/users_database.yml
-            args: {}
+            args:
+              authelia_password_hash: !env AUTHELIA_PASSWORD_HASH
 
   terraform:
     lxc:
