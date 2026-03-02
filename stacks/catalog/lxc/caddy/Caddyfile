@@ -69,6 +69,10 @@ unifi.infra.the-lab.zone {
 }
 
 garage.infra.the-lab.zone {
+	forward_auth http://10.40.1.4:9091 {
+		uri /api/authz/forward-auth
+		copy_headers Remote-User Remote-Groups Remote-Name Remote-Email
+	}
 	reverse_proxy http://10.40.1.10:3909
 }
 
