@@ -6,3 +6,19 @@ workflows:
         command: >-
           sudo -E atmos packer build lxc -s coredns
       - command: terraform apply lxc -s coredns -auto-approve
+      - type: shell
+        command: >-
+          octodns-sync --config-file octodns.yaml --doit
+
+  coredns/deploy-zone:
+    description: "Deploy the BIND zone file to the running container and reload CoreDNS"
+    steps:
+      - type: shell
+        command: >-
+          scp stacks/catalog/lxc/coredns/the-lab.zone ${PROXMOX_SSH_USERNAME}@${PROXMOX_SSH_HOST}:/tmp/the-lab.zone
+      - type: shell
+        command: >-
+          ssh ${PROXMOX_SSH_USERNAME}@${PROXMOX_SSH_HOST} "sudo pct push 102 /tmp/the-lab.zone /etc/coredns/the-lab.zone --perms 0644 && sudo pct exec 102 -- systemctl restart coredns && rm /tmp/the-lab.zone"
+      - type: shell
+        command: >-
+          octodns-sync --config-file octodns.yaml --doit

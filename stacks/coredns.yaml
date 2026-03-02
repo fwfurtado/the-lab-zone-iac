@@ -13,8 +13,8 @@ components:
           "/etc/coredns/Corefile":
             source: stacks/catalog/lxc/coredns/Corefile
             args: {}
-          "/etc/coredns/db.the-lab.zone":
-            source: stacks/catalog/lxc/coredns/db.the-lab.zone
+          "/etc/coredns/the-lab.zone":
+            source: stacks/catalog/lxc/coredns/the-lab.zone
             args: {}
 
   terraform:

@@ -1,0 +1,23 @@
+processors:
+  no-root-ns:
+    class: octodns.processor.filter.IgnoreRootNsFilter
+
+providers:
+  zonefile:
+    class: octodns_bind.ZoneFileSource
+    directory: stacks/catalog/lxc/coredns
+    file_extension: ''
+    check_origin: false
+
+  cloudflare:
+    class: octodns_cloudflare.CloudflareProvider
+    token: env/CLOUDFLARE_API_KEY
+
+zones:
+  the-lab.zone.:
+    processors:
+      - no-root-ns
+    sources:
+      - zonefile
+    targets:
+      - cloudflare

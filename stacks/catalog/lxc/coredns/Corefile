@@ -1,5 +1,5 @@
 the-lab.zone {
-    file /etc/coredns/db.the-lab.zone
+    file /etc/coredns/the-lab.zone
     prometheus :9153
     log
     errors

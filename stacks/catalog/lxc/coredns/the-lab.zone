@@ -11,8 +11,9 @@ $TTL 3600
 
     IN NS ns1.the-lab.zone.
 
-ns1       IN A     10.40.1.83
-ingress   IN A     10.40.1.1
+ns1             IN A     10.40.1.83
+ingress         IN A     10.40.1.1
+postgres.infra  IN A     10.40.1.41
 
 *         IN CNAME ingress.the-lab.zone.
 
