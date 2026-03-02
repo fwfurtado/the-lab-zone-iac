@@ -1,0 +1,8 @@
+workflows:
+  postgresql/apply:
+    description: "Apply the PostgreSQL stack"
+    steps:
+      - type: shell
+        command: >-
+          sudo -E atmos packer build lxc -s postgresql
+      - command: terraform apply lxc -s postgresql -auto-approve

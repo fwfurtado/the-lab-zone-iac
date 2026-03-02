@@ -1,0 +1,202 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/ansible-community/ansible-lint/schemas/src/ansiblelint/f/ansible-playbook-schema.json
+---
+- hosts: localhost
+  become: true
+  vars:
+    pg_supported_majors:
+      - "18"
+  tasks:
+    - name: Load extra vars from Packer
+      ansible.builtin.include_vars:
+        file: /tmp/ansible-extra-vars.json
+
+    - name: Validate PostgreSQL major version
+      ansible.builtin.assert:
+        that:
+          - postgres_major_version is defined
+          - postgres_major_version | string | trim | length > 0
+          - postgres_major_version | string | trim in pg_supported_majors
+        fail_msg: >-
+          postgres_major_version is missing or unsupported.
+          Supported values: {{ pg_supported_majors | join(', ') }}.
+
+    - name: Set PostgreSQL major version fact
+      ansible.builtin.set_fact:
+        pg_major_version: "{{ postgres_major_version | string | trim }}"
+
+    - name: Install prerequisites for PostgreSQL PGDG repository
+      ansible.builtin.apt:
+        name:
+          - ca-certificates
+          - curl
+          - gnupg
+          - openssl
+          - rsync
+          - ssl-cert
+        state: present
+        update_cache: true
+
+    - name: Ensure APT keyrings directory exists
+      ansible.builtin.file:
+        path: /etc/apt/keyrings
+        state: directory
+        mode: "0755"
+
+    - name: Install PostgreSQL repository signing key
+      ansible.builtin.get_url:
+        url: "https://www.postgresql.org/media/keys/ACCC4CF8.asc"
+        dest: /etc/apt/keyrings/postgresql.asc
+        mode: "0644"
+        force: true
+
+    - name: Add PostgreSQL PGDG repository
+      ansible.builtin.apt_repository:
+        repo: >-
+          deb [signed-by=/etc/apt/keyrings/postgresql.asc]
+          http://apt.postgresql.org/pub/repos/apt bookworm-pgdg main
+        filename: postgresql-pgdg
+        state: present
+
+    - name: Install PostgreSQL versioned packages
+      ansible.builtin.apt:
+        name:
+          - "postgresql-{{ pg_major_version }}"
+          - "postgresql-client-{{ pg_major_version }}"
+          - "postgresql-contrib-{{ pg_major_version }}"
+        state: present
+        update_cache: true
+
+    - name: Set PostgreSQL directories
+      ansible.builtin.set_fact:
+        pg_main_dir: "/var/lib/postgresql/{{ pg_major_version }}/main"
+        pg_data_dir: "/var/lib/postgresql/data"
+        pg_conf_dir: "/etc/postgresql/{{ pg_major_version }}/main"
+        pg_postgresql_conf: "/etc/postgresql/{{ pg_major_version }}/main/postgresql.conf"
+        pg_hba_conf: "/etc/postgresql/{{ pg_major_version }}/main/pg_hba.conf"
+
+    - name: Ensure PostgreSQL listens on all interfaces
+      ansible.builtin.lineinfile:
+        path: "{{ pg_postgresql_conf }}"
+        regexp: "^#?\\s*listen_addresses\\s*="
+        line: "listen_addresses = '*'"
+        create: false
+
+    - name: Ensure lab network access rule exists in pg_hba.conf
+      ansible.builtin.blockinfile:
+        path: "{{ pg_hba_conf }}"
+        marker: "# {mark} ANSIBLE MANAGED BLOCK - LAB NETWORK ACCESS"
+        block: |
+          # Rede interna do lab
+          host    all             all             10.40.0.0/21           scram-sha-256
+
+    - name: Ensure dedicated PostgreSQL data directory exists
+      ansible.builtin.file:
+        path: "{{ pg_data_dir }}"
+        state: directory
+        owner: postgres
+        group: postgres
+        mode: "0700"
+
+    - name: Stop PostgreSQL service before data migration
+      ansible.builtin.systemd:
+        name: postgresql
+        state: stopped
+      failed_when: false
+
+    - name: Check PostgreSQL default main directory state
+      ansible.builtin.stat:
+        path: "{{ pg_main_dir }}"
+      register: pg_main_stat
+
+    - name: Check whether dedicated data directory is initialized
+      ansible.builtin.stat:
+        path: "{{ pg_data_dir }}/PG_VERSION"
+      register: pg_data_initialized
+
+    - name: Migrate cluster data to dedicated data directory
+      ansible.builtin.command:
+        cmd: "rsync -a --delete {{ pg_main_dir }}/ {{ pg_data_dir }}/"
+      when:
+        - pg_main_stat.stat.exists
+        - not pg_main_stat.stat.islnk
+        - not pg_data_initialized.stat.exists
+
+    - name: Backup default PostgreSQL data directory
+      ansible.builtin.command:
+        cmd: "mv {{ pg_main_dir }} {{ pg_main_dir }}.bak"
+      when:
+        - pg_main_stat.stat.exists
+        - not pg_main_stat.stat.islnk
+
+    - name: Link PostgreSQL main directory to dedicated mount point
+      ansible.builtin.file:
+        src: "{{ pg_data_dir }}"
+        dest: "{{ pg_main_dir }}"
+        state: link
+        force: true
+
+    - name: Ensure PostgreSQL main symlink ownership
+      ansible.builtin.command:
+        cmd: "chown -h postgres:postgres {{ pg_main_dir }}"
+      changed_when: false
+
+    - name: Ensure PostgreSQL data directory ownership
+      ansible.builtin.file:
+        path: "{{ pg_data_dir }}"
+        state: directory
+        owner: postgres
+        group: postgres
+        mode: "0700"
+        recurse: true
+
+    - name: Ensure PostgreSQL instance override directory exists
+      ansible.builtin.file:
+        path: "/etc/systemd/system/postgresql@{{ pg_major_version }}-main.service.d"
+        state: directory
+        mode: "0755"
+
+    - name: Install PostgreSQL instance override for data permissions
+      ansible.builtin.copy:
+        dest: "/etc/systemd/system/postgresql@{{ pg_major_version }}-main.service.d/override.conf"
+        mode: "0644"
+        content: |
+          [Service]
+          ExecStartPre=/bin/mkdir -p {{ pg_data_dir }}
+          ExecStartPre=/bin/chown -R postgres:postgres {{ pg_data_dir }}
+          ExecStartPre=/bin/chmod 0700 {{ pg_data_dir }}
+          ExecStartPre=/bin/chown -h postgres:postgres {{ pg_main_dir }}
+          ExecStartPre=/bin/sh -ec 'if [ ! -f /etc/ssl/private/ssl-cert-snakeoil.key ]; then /usr/bin/openssl req -new -x509 -nodes -newkey rsa:2048 -days 3650 -subj "/CN=postgresql" -keyout /etc/ssl/private/ssl-cert-snakeoil.key -out /etc/ssl/certs/ssl-cert-snakeoil.pem && /bin/chown root:ssl-cert /etc/ssl/private/ssl-cert-snakeoil.key && /bin/chmod 0640 /etc/ssl/private/ssl-cert-snakeoil.key && /bin/chmod 0644 /etc/ssl/certs/ssl-cert-snakeoil.pem; fi'
+
+    - name: Reload systemd daemon
+      ansible.builtin.systemd:
+        daemon_reload: true
+
+    - name: Ensure PostgreSQL snakeoil certificate exists
+      ansible.builtin.command:
+        cmd: >-
+          /bin/sh -ec
+          'if [ ! -f /etc/ssl/private/ssl-cert-snakeoil.key ]; then /usr/bin/openssl req -new -x509 -nodes -newkey rsa:2048 -days 3650 -subj "/CN=postgresql" -keyout /etc/ssl/private/ssl-cert-snakeoil.key -out /etc/ssl/certs/ssl-cert-snakeoil.pem && /bin/chown root:ssl-cert /etc/ssl/private/ssl-cert-snakeoil.key && /bin/chmod 0640 /etc/ssl/private/ssl-cert-snakeoil.key && /bin/chmod 0644 /etc/ssl/certs/ssl-cert-snakeoil.pem; fi'
+      args:
+        creates: /etc/ssl/private/ssl-cert-snakeoil.key
+
+    - name: Ensure PostgreSQL service is enabled and started
+      ansible.builtin.systemd:
+        name: postgresql
+        enabled: true
+        state: started
+
+    - name: Ensure PostgreSQL instance service is enabled and started
+      ansible.builtin.systemd:
+        name: "postgresql@{{ pg_major_version }}-main"
+        enabled: true
+        state: started
+
+    - name: Set postgres password when provided
+      ansible.builtin.command:
+        cmd: >-
+          runuser -u postgres -- psql -v ON_ERROR_STOP=1 -c
+          "ALTER USER postgres WITH PASSWORD '{{ postgres_admin_password }}';"
+      no_log: true
+      when:
+        - postgres_admin_password is defined
+        - postgres_admin_password | length > 0
