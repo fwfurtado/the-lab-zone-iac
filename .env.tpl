@@ -19,6 +19,8 @@ export ZOT_IMAGE_REGISTRY_USERNAME={{ op://homelab/Zot K8s/username}}
 export ZOT_IMAGE_REGISTRY_PASSWORD={{ op://homelab/Zot K8s/password}}
 
 
+export GARAGE_RPC_SECRET={{ op://homelab/Garage RPC Secret/secret }}
+export GARAGE_ADMIN_TOKEN={{ op://homelab/Garage Admin Token/credential }}
 export GARAGE_CADDY_ACCESS_KEY={{ op://homelab/Caddy Garage S3/access-key-id}}
 export GARAGE_CADDY_SECRET_KEY={{ op://homelab/Caddy Garage S3/secret-access-key}}
 

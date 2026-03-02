@@ -1,0 +1,57 @@
+# yaml-language-server: $schema=https://atmos.tools/schemas/atmos/atmos-manifest/1.0/atmos-manifest.json
+
+import:
+  - catalog/_packer-lxc.yaml
+  - catalog/_terraform-lxc.yaml
+
+components:
+  packer:
+    lxc:
+      vars:
+        app_name: garage
+        ansible_extra_vars:
+          garage_rpc_secret: !env GARAGE_RPC_SECRET
+          garage_admin_token: !env GARAGE_ADMIN_TOKEN
+        files:
+          "/etc/garage/garage.toml":
+            source: stacks/catalog/lxc/garage/garage.toml
+            args:
+              rpc_secret: !env GARAGE_RPC_SECRET
+              admin_token: !env GARAGE_ADMIN_TOKEN
+
+  terraform:
+    lxc:
+      component: lxc
+      metadata:
+        terraform_workspace: "{{ .stack }}"
+      vars:
+        proxmox_node_name: !env PROXMOX_SSH_NODE_NAME
+        proxmox_host: !env PROXMOX_SSH_HOST
+        proxmox_ssh_username: !env PROXMOX_SSH_USERNAME
+        proxmox_ssh_agent: !env PROXMOX_SSH_AGENT
+        template_file: "components/packer/components/lxc/output/garage-debian-bookworm-template.tar.gz"
+        container:
+          id: 110
+          hostname: "garage"
+          description: "Garage S3"
+          network:
+            ip_cidr: "10.40.1.10/21"
+            dns:
+              servers: ["1.1.1.1", "1.0.0.1"]
+          tags:
+            - "core"
+            - "{{ .stack }}"
+            - "{{ .component }}"
+          image:
+            repository: "dxflrs/garage"
+            tag: "latest"
+          resources:
+            cpu: 2
+            memory: 2048
+            disk:
+              size: 10
+          mount_points:
+            - volume: "ssd-standard:100"
+              path: "/var/lib/garage/data"
+              size: "100G"
+              backup: true

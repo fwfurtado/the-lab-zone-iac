@@ -1,0 +1,8 @@
+workflows:
+  garage/apply:
+    description: "Apply the Garage stack"
+    steps:
+      - type: shell
+        command: >-
+          sudo -E atmos packer build lxc -s garage
+      - command: terraform apply lxc -s garage -auto-approve

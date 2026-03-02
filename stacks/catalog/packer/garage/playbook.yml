@@ -1,0 +1,200 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/ansible-community/ansible-lint/schemas/src/ansiblelint/f/ansible-playbook-schema.json
+---
+- hosts: localhost
+  become: true
+  vars:
+    garage_version: "2.2.0"
+    garage_webui_version: "1.1.0"
+    garage_arch: "amd64"
+    garage_data_dir: "/var/lib/garage/data"
+    garage_meta_dir: "/var/lib/garage/meta"
+  tasks:
+    - name: Load extra vars from Packer
+      ansible.builtin.include_vars:
+        file: /tmp/ansible-extra-vars.json
+
+    - name: Download Garage release
+      ansible.builtin.get_url:
+        url: "https://garagehq.deuxfleurs.fr/_releases/v{{ garage_version }}/x86_64-unknown-linux-musl/garage"
+        dest: /tmp/garage
+        mode: "0755"
+
+    - name: Install Garage binary
+      ansible.builtin.copy:
+        src: /tmp/garage
+        dest: /usr/local/bin/garage
+        remote_src: true
+        mode: "0755"
+
+    - name: Download Garage Web UI release
+      ansible.builtin.get_url:
+        url: "https://github.com/khairul169/garage-webui/releases/download/{{ garage_webui_version }}/garage-webui-v{{ garage_webui_version }}-linux-{{ garage_arch }}"
+        dest: /tmp/garage-webui
+        mode: "0755"
+
+    - name: Install Garage Web UI binary
+      ansible.builtin.copy:
+        src: /tmp/garage-webui
+        dest: /usr/local/bin/garage-webui
+        remote_src: true
+        mode: "0755"
+
+    - name: Create garage group
+      ansible.builtin.group:
+        name: garage
+        system: true
+
+    - name: Create garage user
+      ansible.builtin.user:
+        name: garage
+        group: garage
+        system: true
+        shell: /usr/sbin/nologin
+        create_home: false
+
+    - name: Create Garage config directory
+      ansible.builtin.file:
+        path: /etc/garage
+        state: directory
+        owner: garage
+        group: garage
+        mode: "0755"
+
+    - name: Create Garage metadata directory
+      ansible.builtin.file:
+        path: "{{ garage_meta_dir }}"
+        state: directory
+        owner: garage
+        group: garage
+        mode: "0755"
+
+    - name: Create Garage data directory
+      ansible.builtin.file:
+        path: "{{ garage_data_dir }}"
+        state: directory
+        owner: garage
+        group: garage
+        mode: "0755"
+
+    - name: Create Garage systemd service
+      ansible.builtin.copy:
+        dest: /etc/systemd/system/garage.service
+        mode: "0644"
+        content: |
+          [Unit]
+          Description=Garage S3-compatible object storage
+          After=network.target
+
+          [Service]
+          Type=simple
+          User=garage
+          Group=garage
+          ExecStartPre=+/bin/mkdir -p /var/lib/garage/data
+          ExecStartPre=+/bin/mkdir -p /var/lib/garage/meta
+          ExecStartPre=+/bin/chown -R garage:garage /var/lib/garage/data
+          ExecStartPre=+/bin/chown -R garage:garage /var/lib/garage/meta
+          ExecStartPre=+/bin/chmod 0755 /var/lib/garage/data
+          ExecStartPre=+/bin/chmod 0755 /var/lib/garage/meta
+          ExecStart=/usr/local/bin/garage server
+          Environment=GARAGE_CONFIG_FILE=/etc/garage/garage.toml
+          Restart=on-failure
+          RestartSec=5
+          LimitNOFILE=1048576
+
+          [Install]
+          WantedBy=multi-user.target
+
+    - name: Create Garage Web UI systemd service
+      ansible.builtin.copy:
+        dest: /etc/systemd/system/garage-webui.service
+        mode: "0644"
+        content: |
+          [Unit]
+          Description=Garage Web UI
+          After=network.target garage.service
+          Requires=garage.service
+
+          [Service]
+          Type=simple
+          User=garage
+          Group=garage
+          ExecStart=/usr/local/bin/garage-webui
+          Environment=CONFIG_PATH=/etc/garage/garage.toml
+          Environment=PORT=3909
+          Restart=on-failure
+          RestartSec=5
+
+          [Install]
+          WantedBy=multi-user.target
+
+    - name: Enable Garage service
+      ansible.builtin.systemd:
+        name: garage
+        enabled: true
+        daemon_reload: true
+
+    - name: Enable Garage Web UI service
+      ansible.builtin.systemd:
+        name: garage-webui
+        enabled: true
+        daemon_reload: true
+
+    - name: Cleanup download artifacts
+      ansible.builtin.file:
+        path: "{{ item }}"
+        state: absent
+      loop:
+        - /tmp/garage
+        - /tmp/garage-webui
+
+    - name: Read packer files JSON
+      ansible.builtin.command:
+        cmd: cat /tmp/packer-files.json
+      register: packer_files_raw
+      changed_when: false
+
+    - name: Parse packer files
+      ansible.builtin.set_fact:
+        packer_files: "{{ (packer_files_raw.stdout | from_json).packer_files }}"
+
+    - name: Create directories for Packer files
+      ansible.builtin.file:
+        path: "{{ item.key | dirname }}"
+        state: directory
+        owner: garage
+        group: garage
+        mode: "0755"
+      loop: "{{ packer_files | dict2items }}"
+
+    - name: Write Packer files (static content)
+      ansible.builtin.copy:
+        content: "{{ item.value.content }}"
+        dest: "{{ item.key }}"
+        owner: garage
+        group: garage
+        mode: "0644"
+        force: true
+      loop: "{{ packer_files | dict2items }}"
+      when: (item.value.args | default({}) | length) == 0
+
+    - name: Write template to temp file for rendering
+      ansible.builtin.copy:
+        content: "{{ item.value.content }}"
+        dest: "/tmp/packer-tpl-{{ item.key | hash('md5') }}.j2"
+        mode: "0644"
+        force: true
+      loop: "{{ packer_files | dict2items }}"
+      when: (item.value.args | default({}) | length) > 0
+
+    - name: Render Packer template files
+      ansible.builtin.template:
+        src: "/tmp/packer-tpl-{{ item.key | hash('md5') }}.j2"
+        dest: "{{ item.key }}"
+        owner: garage
+        group: garage
+        mode: "0644"
+        force: true
+      vars:
+        tpl_args: "{{ item.value.args | default({}) }}"
+      loop: "{{ packer_files | dict2items }}"
+      when: (item.value.args | default({}) | length) > 0
