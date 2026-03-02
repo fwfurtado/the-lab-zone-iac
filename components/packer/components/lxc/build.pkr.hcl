@@ -16,7 +16,6 @@ build {
   }
 
   provisioner "ansible-local" {
-    command = "ansible-playbook -vvv"
     playbook_file = local.playbook_file
   }
 
