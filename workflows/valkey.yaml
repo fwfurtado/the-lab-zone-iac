@@ -1,0 +1,8 @@
+workflows:
+  valkey/apply:
+    description: "Apply the Valkey stack"
+    steps:
+      - type: shell
+        command: >-
+          sudo -E atmos packer build lxc -s valkey
+      - command: terraform apply lxc -s valkey -auto-approve

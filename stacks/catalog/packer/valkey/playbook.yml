@@ -1,0 +1,99 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/ansible-community/ansible-lint/schemas/src/ansiblelint/f/ansible-playbook-schema.json
+---
+- hosts: localhost
+  become: true
+  vars:
+    valkey_data_dir: "/var/lib/valkey/data"
+    valkey_conf: "/etc/valkey/valkey.conf"
+  tasks:
+    - name: Load extra vars from Packer
+      ansible.builtin.include_vars:
+        file: /tmp/ansible-extra-vars.json
+
+    - name: Add bookworm-backports repository
+      ansible.builtin.apt_repository:
+        repo: "deb http://deb.debian.org/debian bookworm-backports main"
+        filename: bookworm-backports
+        state: present
+
+    - name: Install Valkey from backports
+      ansible.builtin.apt:
+        name:
+          - valkey-server
+          - valkey-tools
+        default_release: bookworm-backports
+        state: present
+        update_cache: true
+
+    - name: Ensure Valkey data directory exists
+      ansible.builtin.file:
+        path: "{{ valkey_data_dir }}"
+        state: directory
+        owner: valkey
+        group: valkey
+        mode: "0750"
+
+    - name: Configure Valkey to bind on all interfaces
+      ansible.builtin.lineinfile:
+        path: "{{ valkey_conf }}"
+        regexp: "^#?\\s*bind\\s+"
+        line: "bind 0.0.0.0"
+        create: false
+
+    - name: Configure Valkey data directory
+      ansible.builtin.lineinfile:
+        path: "{{ valkey_conf }}"
+        regexp: "^#?\\s*dir\\s+"
+        line: "dir {{ valkey_data_dir }}"
+        create: false
+
+    - name: Enable AOF persistence
+      ansible.builtin.lineinfile:
+        path: "{{ valkey_conf }}"
+        regexp: "^#?\\s*appendonly\\s+"
+        line: "appendonly yes"
+        create: false
+
+    - name: Set Valkey password when provided
+      ansible.builtin.lineinfile:
+        path: "{{ valkey_conf }}"
+        regexp: "^#?\\s*requirepass\\s+"
+        line: "requirepass {{ valkey_password }}"
+        create: false
+      no_log: true
+      when:
+        - valkey_password is defined
+        - valkey_password | length > 0
+
+    - name: Configure protected-mode
+      ansible.builtin.lineinfile:
+        path: "{{ valkey_conf }}"
+        regexp: "^#?\\s*protected-mode\\s+"
+        line: "protected-mode yes"
+        create: false
+
+    - name: Ensure Valkey service override directory exists
+      ansible.builtin.file:
+        path: /etc/systemd/system/valkey-server.service.d
+        state: directory
+        mode: "0755"
+
+    - name: Install Valkey service override for data permissions
+      ansible.builtin.copy:
+        dest: /etc/systemd/system/valkey-server.service.d/override.conf
+        mode: "0644"
+        content: |
+          [Service]
+          ExecStartPre=+/bin/mkdir -p {{ valkey_data_dir }}
+          ExecStartPre=+/bin/chown -R valkey:valkey {{ valkey_data_dir }}
+          ExecStartPre=+/bin/chmod 0750 {{ valkey_data_dir }}
+
+    - name: Reload systemd daemon
+      ansible.builtin.systemd:
+        daemon_reload: true
+
+    - name: Ensure Valkey service is enabled and started
+      ansible.builtin.systemd:
+        name: valkey-server
+        enabled: true
+        state: started

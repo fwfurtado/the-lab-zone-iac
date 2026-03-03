@@ -33,6 +33,8 @@ export AUTHELIA_STORAGE_ENCRYPTION_KEY={{ op://homelab/Authelia/storage_encrypti
 export POSTGRES_MAJOR_VERSION=18
 export POSTGRES_ADMIN_PASSWORD={{ op://homelab/PostgreSQL Admin/password }}
 
+export VALKEY_PASSWORD={{ op://homelab/Valkey/password }}
+
 export TRUENAS_SSH_HOST={{ op://homelab/TrueNAS root Ssh Key/host}}
 export TRUENAS_SSH_PORT=2223
 export TRUENAS_SSH_USERNAME={{ op://homelab/TrueNAS root Ssh Key/username}}
