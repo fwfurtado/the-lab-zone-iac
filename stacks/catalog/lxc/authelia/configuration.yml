@@ -27,6 +27,8 @@ authentication_backend:
 
 session:
   secret: '{{ env "AUTH_SESSION_SECRET" }}'
+  expiration: 6h
+  inactivity: 0
   cookies:
     - domain: the-lab.zone
       authelia_url: https://auth.infra.the-lab.zone
