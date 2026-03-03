@@ -1,0 +1,33 @@
+workflows:
+  gitea/apply:
+    description: "Apply the Gitea stack"
+    steps:
+      - type: shell
+        command: >-
+          sudo -E atmos packer build lxc -s gitea
+      - command: terraform apply garage-bucket -s gitea -auto-approve
+      - command: terraform apply postgresql-database -s gitea -auto-approve
+      - command: terraform apply lxc -s gitea -auto-approve
+      - command: workflow gitea/deploy-config
+
+  gitea/deploy-config:
+    description: "Deploy Gitea config and secrets to the running container without rebuild"
+    steps:
+      - type: shell
+        command: >-
+          op inject -i stacks/catalog/lxc/gitea/app.ini -o /tmp/gitea-app.ini
+      - type: shell
+        command: >-
+          scp
+          /tmp/gitea-app.ini
+          ${PROXMOX_SSH_USERNAME}@${PROXMOX_SSH_HOST}:/tmp/
+      - type: shell
+        command: >-
+          ssh ${PROXMOX_SSH_USERNAME}@${PROXMOX_SSH_HOST}
+          "sudo pct push 120 /tmp/gitea-app.ini /etc/gitea/app.ini --perms 0640
+          && sudo pct exec 120 -- chown git:git /etc/gitea/app.ini
+          && sudo pct exec 120 -- systemctl restart gitea
+          && rm -f /tmp/gitea-app.ini"
+      - type: shell
+        command: >-
+          rm -f /tmp/gitea-app.ini

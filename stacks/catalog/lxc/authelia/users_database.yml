@@ -4,6 +4,6 @@ users:
     disabled: false
     displayname: "Fernando Furtado"
     email: fwfurtado@gmail.com
-    password: "{{ tpl_args.authelia_password_hash }}"
+    password: "{{ op://homelab/Authelia/password_hash }}"
     groups:
       - admins

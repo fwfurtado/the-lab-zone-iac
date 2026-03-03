@@ -18,16 +18,16 @@
 	# }
 
 	# ── ACME via Cloudflare DNS challenge ──
-	acme_dns cloudflare "{{ tpl_args.cf_api_token }}"
+	acme_dns cloudflare "{{ op://development/Cloudflare/the-lab.zone }}"
 
 	# ── Layer4 for SSH passthrough ──
-	# layer4 {
-	# 	:22 {
-	# 		route {
-	# 			proxy "10.40.1.20:2222"
-	# 		}
-	# 	}
-	# }
+	layer4 {
+		:22 {
+			route {
+				proxy "10.40.1.20:22"
+			}
+		}
+	}
 
 	# ── Logging ──
 	log {
@@ -81,7 +81,7 @@ s3.infra.the-lab.zone {
 }
 
 git.infra.the-lab.zone {
-	reverse_proxy http://10.40.1.20
+	reverse_proxy http://10.40.1.20:3000
 }
 
 auth.infra.the-lab.zone {

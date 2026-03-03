@@ -6,3 +6,39 @@ workflows:
         command: >-
           sudo -E atmos packer build lxc -s authelia
       - command: terraform apply lxc -s authelia -auto-approve
+      - command: workflow authelia/deploy-config
+
+  authelia/deploy-config:
+    description: "Deploy Authelia config and secrets to the running container without rebuild"
+    steps:
+      - type: shell
+        command: >-
+          op inject -i stacks/catalog/lxc/authelia/env.tpl -o /tmp/authelia-env
+      - type: shell
+        command: >-
+          op inject -i stacks/catalog/lxc/authelia/jwks.pem.tpl -o /tmp/authelia-jwks.pem
+      - type: shell
+        command: >-
+          op inject -i stacks/catalog/lxc/authelia/users_database.yml -o /tmp/authelia-users_database.yml
+      - type: shell
+        command: >-
+          scp
+          stacks/catalog/lxc/authelia/configuration.yml
+          /tmp/authelia-env
+          /tmp/authelia-jwks.pem
+          /tmp/authelia-users_database.yml
+          ${PROXMOX_SSH_USERNAME}@${PROXMOX_SSH_HOST}:/tmp/
+      - type: shell
+        command: >-
+          ssh ${PROXMOX_SSH_USERNAME}@${PROXMOX_SSH_HOST}
+          "sudo pct push 104 /tmp/configuration.yml /etc/authelia/configuration.yml --perms 0640
+          && sudo pct push 104 /tmp/authelia-users_database.yml /etc/authelia/users_database.yml --perms 0640
+          && sudo pct push 104 /tmp/authelia-env /etc/authelia/env --perms 0640
+          && sudo pct push 104 /tmp/authelia-jwks.pem /etc/authelia/jwks.pem --perms 0640
+          && sudo pct exec 104 -- chown authelia:authelia /etc/authelia/configuration.yml /etc/authelia/users_database.yml /etc/authelia/env /etc/authelia/jwks.pem
+          && sudo pct exec 104 -- systemctl daemon-reload
+          && sudo pct exec 104 -- systemctl restart authelia
+          && rm -f /tmp/configuration.yml /tmp/authelia-users_database.yml /tmp/authelia-env /tmp/authelia-jwks.pem"
+      - type: shell
+        command: >-
+          rm -f /tmp/authelia-env /tmp/authelia-jwks.pem /tmp/authelia-users_database.yml

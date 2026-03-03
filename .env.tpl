@@ -29,13 +29,14 @@ export TECHNITIUM_ADMIN_PASSWORD={{ op://homelab/Technitium Admin/password }}
 export AUTHELIA_JWT_SECRET={{ op://homelab/Authelia/jwt_secret }}
 export AUTHELIA_SESSION_SECRET={{ op://homelab/Authelia/session_secret }}
 export AUTHELIA_STORAGE_ENCRYPTION_KEY={{ op://homelab/Authelia/storage_encryption_key }}
+
 export POSTGRES_MAJOR_VERSION=18
 export POSTGRES_ADMIN_PASSWORD={{ op://homelab/PostgreSQL Admin/password }}
-
 
 export TRUENAS_SSH_HOST={{ op://homelab/TrueNAS root Ssh Key/host}}
 export TRUENAS_SSH_PORT=2223
 export TRUENAS_SSH_USERNAME={{ op://homelab/TrueNAS root Ssh Key/username}}
 export TRUENAS_SSH_PRIVATE_KEY="{{ op://homelab/TrueNAS root Ssh Key/private key?ssh-format=openssh}}"
 export TRUENAS_SSH_HOST_KEY_FINGERPRINT={{ op://homelab/TrueNAS root Ssh Key/host-fingerprints/ECDSA}}
-export AUTHELIA_PASSWORD_HASH="{{ op://homelab/Authelia/password-hash-escaped }}"
+
+export GITEA_DB_PASSWORD={{ op://homelab/Gitea Database/password }}

@@ -12,8 +12,6 @@ components:
         files:
           "/etc/caddy/Caddyfile":
             source: stacks/catalog/lxc/caddy/Caddyfile
-            args:
-              cf_api_token: !env CLOUDFLARE_API_KEY
 
   terraform:
     lxc:

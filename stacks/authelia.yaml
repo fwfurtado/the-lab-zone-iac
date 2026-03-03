@@ -12,14 +12,10 @@ components:
         files:
           "/etc/authelia/configuration.yml":
             source: stacks/catalog/lxc/authelia/configuration.yml
-            args:
-              jwt_secret: !env AUTHELIA_JWT_SECRET
-              session_secret: !env AUTHELIA_SESSION_SECRET
-              storage_encryption_key: !env AUTHELIA_STORAGE_ENCRYPTION_KEY
+            args: {}
           "/etc/authelia/users_database.yml":
             source: stacks/catalog/lxc/authelia/users_database.yml
-            args:
-              authelia_password_hash: !env AUTHELIA_PASSWORD_HASH
+            args: {}
 
   terraform:
     lxc:

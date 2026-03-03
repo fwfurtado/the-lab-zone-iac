@@ -12,7 +12,7 @@ log:
 
 identity_validation:
   reset_password:
-    jwt_secret: "{{ tpl_args.jwt_secret }}"
+    jwt_secret: '{{ env "AUTH_RESET_PASSWORD_JWT_SECRET" }}'
 
 authentication_backend:
   file:
@@ -26,13 +26,13 @@ authentication_backend:
       key_length: 32
 
 session:
-  secret: "{{ tpl_args.session_secret }}"
+  secret: '{{ env "AUTH_SESSION_SECRET" }}'
   cookies:
     - domain: the-lab.zone
       authelia_url: https://auth.infra.the-lab.zone
 
 storage:
-  encryption_key: "{{ tpl_args.storage_encryption_key }}"
+  encryption_key: '{{ env "AUTH_STORAGE_ENCRYPTION_KEY" }}'
   local:
     path: /var/lib/authelia/db.sqlite3
 
@@ -42,3 +42,22 @@ access_control:
 notifier:
   filesystem:
     filename: /var/lib/authelia/notification.txt
+
+identity_providers:
+  oidc:
+    hmac_secret: '{{ env "AUTH_OIDC_HMAC_SECRET" }}'
+    jwks:
+      - key: |
+{{ secret "/etc/authelia/jwks.pem" | indent 10 }}
+    clients:
+      - client_id: gitea
+        client_name: Gitea
+        client_secret: '{{ env "AUTH_GITEA_OIDC_CLIENT_SECRET" }}'
+        redirect_uris:
+          - https://git.infra.the-lab.zone/user/oauth2/authelia/callback
+        scopes:
+          - openid
+          - profile
+          - email
+          - groups
+        token_endpoint_auth_method: client_secret_post

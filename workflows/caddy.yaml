@@ -9,3 +9,22 @@ workflows:
         command: >-
           sudo -E atmos packer build lxc -s caddy
       - command: terraform apply lxc -s caddy -auto-approve
+
+  caddy/deploy-config:
+    description: "Deploy the Caddyfile to the running container and reload Caddy"
+    steps:
+      - type: shell
+        command: >-
+          caddy fmt --overwrite stacks/catalog/lxc/caddy/Caddyfile && echo "✅ Caddyfile was successfully formatted" || echo "❌ Caddyfile was not formatted"
+      - type: shell
+        command: >-
+          op inject -i stacks/catalog/lxc/caddy/Caddyfile -o /tmp/Caddyfile
+      - type: shell
+        command: >-
+          scp /tmp/Caddyfile ${PROXMOX_SSH_USERNAME}@${PROXMOX_SSH_HOST}:/tmp/Caddyfile
+      - type: shell
+        command: >-
+          ssh ${PROXMOX_SSH_USERNAME}@${PROXMOX_SSH_HOST} "sudo pct push 121 /tmp/Caddyfile /etc/caddy/Caddyfile --perms 0644 && sudo pct exec 121 -- systemctl restart caddy && rm /tmp/Caddyfile"
+      - type: shell
+        command: >-
+          rm /tmp/Caddyfile
