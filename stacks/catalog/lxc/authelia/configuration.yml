@@ -55,6 +55,7 @@ identity_providers:
       - client_id: gitea
         client_name: Gitea
         client_secret: '{{ env "AUTH_GITEA_OIDC_CLIENT_SECRET" }}'
+        consent_mode: implicit
         redirect_uris:
           - https://git.infra.the-lab.zone/user/oauth2/authelia/callback
         scopes:
