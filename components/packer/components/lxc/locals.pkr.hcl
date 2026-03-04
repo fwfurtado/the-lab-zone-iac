@@ -1,5 +1,6 @@
 locals {
-  playbook_file = abspath("${path.root}/../../../../stacks/catalog/packer/${var.app_name}/playbook.yml")
+  playbook_file          = abspath("${path.root}/../../../../stacks/catalog/packer/${var.app_name}/playbook.yml")
+  step_ca_agent_playbook = abspath("${path.root}/../../../../stacks/catalog/packer/common/step_ca_agent.yml")
 
   extra_vars_json = base64encode(jsonencode(var.ansible_extra_vars))
   write_extra_vars_cmds = length(var.ansible_extra_vars) > 0 ? [

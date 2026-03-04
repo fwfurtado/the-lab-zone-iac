@@ -16,6 +16,10 @@ build {
   }
 
   provisioner "ansible-local" {
+    playbook_file = local.step_ca_agent_playbook
+  }
+
+  provisioner "ansible-local" {
     playbook_file = local.playbook_file
   }
 

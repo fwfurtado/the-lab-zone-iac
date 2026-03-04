@@ -35,6 +35,10 @@ export POSTGRES_ADMIN_PASSWORD={{ op://homelab/PostgreSQL Admin/password }}
 
 export VALKEY_PASSWORD={{ op://homelab/Valkey/password }}
 
+export STEP_CA_PASSWORD={{ op://homelab/Step CA/password }}
+export STEP_CA_URL=https://10.40.1.3:8443
+export STEP_CA_FINGERPRINT={{ op://homelab/Step CA/fingerprint }}
+
 export TRUENAS_SSH_HOST={{ op://homelab/TrueNAS root Ssh Key/host}}
 export TRUENAS_SSH_PORT=2223
 export TRUENAS_SSH_USERNAME={{ op://homelab/TrueNAS root Ssh Key/username}}

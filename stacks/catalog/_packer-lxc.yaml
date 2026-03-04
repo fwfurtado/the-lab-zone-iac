@@ -12,6 +12,8 @@ components:
         release: bookworm
         arch: amd64
         output_dir: output
-        ansible_extra_vars: {}
+        ansible_extra_vars:
+          step_ca_url: !env STEP_CA_URL
+          step_ca_fingerprint: !env STEP_CA_FINGERPRINT
         extra_packages: []
         files: {}

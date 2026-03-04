@@ -1,0 +1,99 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/ansible-community/ansible-lint/schemas/src/ansiblelint/f/ansible-playbook-schema.json
+---
+- hosts: localhost
+  become: true
+  vars:
+    step_cli_version: "0.28.6"
+    step_certs_dir: "/etc/step/certs"
+    step_config_dir: "/etc/step"
+  tasks:
+    - name: Load extra vars from Packer
+      ansible.builtin.include_vars:
+        file: /tmp/ansible-extra-vars.json
+      failed_when: false
+
+    - name: Check if step-ca agent should be configured
+      ansible.builtin.set_fact:
+        step_agent_enabled: >-
+          {{
+            (step_ca_url is defined and step_ca_url | length > 0) and
+            (step_ca_fingerprint is defined and step_ca_fingerprint | length > 0)
+          }}
+
+    - name: Skip step-ca agent setup
+      ansible.builtin.debug:
+        msg: "step_ca_url or step_ca_fingerprint not set, skipping agent setup."
+      when: not step_agent_enabled
+
+    - name: Download step CLI deb package
+      ansible.builtin.get_url:
+        url: "https://dl.smallstep.com/gh-release/cli/gh-release-header/v{{ step_cli_version }}/step-cli_{{ step_cli_version }}-1_amd64.deb"
+        dest: /tmp/step-cli.deb
+        mode: "0644"
+      when: step_agent_enabled
+
+    - name: Install step CLI
+      ansible.builtin.apt:
+        deb: /tmp/step-cli.deb
+        state: present
+      when: step_agent_enabled
+
+    - name: Ensure step config directory exists
+      ansible.builtin.file:
+        path: "{{ step_config_dir }}"
+        state: directory
+        mode: "0755"
+      when: step_agent_enabled
+
+    - name: Ensure step certs directory exists
+      ansible.builtin.file:
+        path: "{{ step_certs_dir }}"
+        state: directory
+        mode: "0755"
+      when: step_agent_enabled
+
+    - name: Bootstrap step-ca trust
+      ansible.builtin.command:
+        cmd: >-
+          step ca bootstrap
+          --ca-url {{ step_ca_url }}
+          --fingerprint {{ step_ca_fingerprint }}
+          --install
+          --force
+      environment:
+        STEPPATH: "{{ step_config_dir }}"
+      when: step_agent_enabled
+
+    - name: Create step-renewer systemd service
+      ansible.builtin.copy:
+        dest: /etc/systemd/system/step-renewer.service
+        mode: "0644"
+        content: |
+          [Unit]
+          Description=Step certificate auto-renewal agent
+          After=network-online.target
+          Wants=network-online.target
+
+          [Service]
+          Type=oneshot
+          RemainAfterExit=true
+          Environment=STEPPATH={{ step_config_dir }}
+          ExecStartPre=/bin/sh -c 'test -f {{ step_certs_dir }}/srv.crt || /bin/step ca certificate "$$(hostname).the-lab.zone" {{ step_certs_dir }}/srv.crt {{ step_certs_dir }}/srv.key --provisioner acme --force'
+          ExecStart=/bin/step ca renew --daemon {{ step_certs_dir }}/srv.crt {{ step_certs_dir }}/srv.key
+
+          [Install]
+          WantedBy=multi-user.target
+      when: step_agent_enabled
+
+    - name: Enable step-renewer service
+      ansible.builtin.systemd:
+        name: step-renewer
+        enabled: true
+        daemon_reload: true
+      when: step_agent_enabled
+
+    - name: Cleanup step CLI download artifacts
+      ansible.builtin.file:
+        path: /tmp/step-cli.deb
+        state: absent
+      when: step_agent_enabled

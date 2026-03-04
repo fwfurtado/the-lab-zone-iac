@@ -1,0 +1,8 @@
+workflows:
+  step-ca/apply:
+    description: "Apply the Step-CA stack"
+    steps:
+      - type: shell
+        command: >-
+          sudo -E atmos packer build lxc -s step-ca
+      - command: terraform apply lxc -s step-ca -auto-approve
