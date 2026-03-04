@@ -1,8 +1,24 @@
 workflows:
   tailscale/apply:
-    description: "Apply the Tailscale stack"
+    description: "Create/update the Tailscale container infrastructure"
+    steps:
+      - command: terraform apply lxc -s tailscale -auto-approve
+
+  tailscale/configure:
+    description: "Configure Tailscale on the running container via Ansible"
     steps:
       - type: shell
         command: >-
-          sudo -E atmos packer build lxc -s tailscale
-      - command: terraform apply lxc -s tailscale -auto-approve
+          cd ansible && ansible-playbook playbooks/configure.yml
+          --limit tailscale
+          -e ts_auth_key=${TS_AUTH_KEY}
+
+  tailscale/drift:
+    description: "Check configuration drift on the Tailscale container"
+    steps:
+      - type: shell
+        command: >-
+          cd ansible && ansible-playbook playbooks/configure.yml
+          --limit tailscale
+          --check --diff
+          -e ts_auth_key=${TS_AUTH_KEY}

@@ -1,19 +1,9 @@
 # yaml-language-server: $schema=https://atmos.tools/schemas/atmos/atmos-manifest/1.0/atmos-manifest.json
 
 import:
-  - catalog/_packer-lxc.yaml
   - catalog/_terraform-lxc.yaml
 
 components:
-  packer:
-    lxc:
-      vars:
-        app_name: gitea
-        files:
-          "/etc/gitea/app.ini":
-            source: stacks/catalog/lxc/gitea/app.ini
-            args: {}
-
   terraform:
     garage-bucket:
       component: garage-bucket
@@ -39,15 +29,17 @@ components:
         database_password: !env GITEA_DB_PASSWORD
 
     lxc:
-      component: lxc
       metadata:
+        component: lxc
         terraform_workspace: "{{ .stack }}-{{ .component }}"
       vars:
         proxmox_node_name: !env PROXMOX_SSH_NODE_NAME
         proxmox_host: !env PROXMOX_SSH_HOST
         proxmox_ssh_username: !env PROXMOX_SSH_USERNAME
         proxmox_ssh_agent: !env PROXMOX_SSH_AGENT
-        template_file: "components/packer/components/lxc/output/gitea-debian-bookworm-template.tar.gz"
+        template_url: "http://download.proxmox.com/images/system/debian-13-standard_13.1-2_amd64.tar.zst"
+        ssh_public_keys:
+          - !env SSH_PUBLIC_KEY
         container:
           id: 120
           hostname: "gitea"
@@ -55,14 +47,12 @@ components:
           network:
             ip_cidr: "10.40.1.20/21"
             dns:
-              servers: ["1.1.1.1", "1.0.0.1"]
+              servers: ["10.40.1.2", "1.1.1.1", "1.0.0.1"]
           tags:
             - "core"
             - "{{ .stack }}"
             - "{{ .component }}"
-          image:
-            repository: "gitea/gitea"
-            tag: "latest"
+          image: {}
           resources:
             cpu: 2
             memory: 2048

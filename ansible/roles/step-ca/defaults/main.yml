@@ -1,0 +1,7 @@
+---
+step_ca_version: "0.28.3"
+step_cli_version: "0.28.6"
+step_ca_arch: "amd64"
+step_ca_home: "/var/lib/step-ca"
+step_ca_config_dir: "/etc/step-ca"
+step_ca_listen_addr: ":8443"

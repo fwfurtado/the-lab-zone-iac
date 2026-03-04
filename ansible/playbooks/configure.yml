@@ -1,0 +1,13 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/ansible-community/ansible-lint/schemas/src/ansiblelint/f/ansible-playbook-schema.json
+---
+- hosts: "{{ target | default('all') }}"
+  become: true
+  tasks:
+    - name: Apply common role
+      ansible.builtin.include_role:
+        name: common
+      when: use_common_role | default(true)
+
+    - name: Apply app-specific role
+      ansible.builtin.include_role:
+        name: "{{ app_role }}"

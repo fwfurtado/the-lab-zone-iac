@@ -13,8 +13,15 @@ $TTL 3600
 
 ns1             IN A     10.40.1.83
 ingress         IN A     10.40.1.1
-postgres.infra  IN A     10.40.1.41
+caddy.infra     IN A     10.40.1.1
+coredns.infra   IN A     10.40.1.2
 step-ca.infra   IN A     10.40.1.3
+authelia.infra  IN A     10.40.1.4
+garage.infra    IN A     10.40.1.10
+gitea.infra     IN A     10.40.1.20
+zot.infra       IN A     10.40.1.31
+postgres.infra  IN A     10.40.1.41
+valkey.infra    IN A     10.40.1.42
 
 *         IN CNAME ingress.the-lab.zone.
 

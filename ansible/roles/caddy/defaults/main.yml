@@ -1,0 +1,5 @@
+---
+go_version: "1.23.6"
+caddy_xcaddy_plugins:
+  - "github.com/mholt/caddy-l4"
+  - "github.com/caddy-dns/cloudflare"

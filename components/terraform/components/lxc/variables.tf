@@ -23,9 +23,15 @@ variable "proxmox_ssh_agent" {
   description = "Whether to use the SSH agent"
 }
 
-variable "template_file" {
+variable "template_url" {
   type        = string
-  description = "Path to a local .tar.gz LXC template built by Packer"
+  description = "URL of a Proxmox LXC template to download (e.g. http://download.proxmox.com/images/system/debian-13-standard_13.0-1_amd64.tar.zst)"
+}
+
+variable "ssh_public_keys" {
+  type        = list(string)
+  description = "SSH public keys to inject into the container for remote access"
+  default     = []
 }
 
 variable "container" {

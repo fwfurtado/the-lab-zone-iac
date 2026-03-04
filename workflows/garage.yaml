@@ -1,8 +1,26 @@
 workflows:
   garage/apply:
-    description: "Apply the Garage stack"
+    description: "Create/update the Garage container infrastructure"
+    steps:
+      - command: terraform apply lxc -s garage -auto-approve
+
+  garage/configure:
+    description: "Configure Garage on the running container via Ansible"
     steps:
       - type: shell
         command: >-
-          sudo -E atmos packer build lxc -s garage
-      - command: terraform apply lxc -s garage -auto-approve
+          cd ansible && ansible-playbook playbooks/configure.yml
+          --limit garage
+          -e step_ca_url=${STEP_CA_URL}
+          -e step_ca_fingerprint=${STEP_CA_FINGERPRINT}
+
+  garage/drift:
+    description: "Check configuration drift on the Garage container"
+    steps:
+      - type: shell
+        command: >-
+          cd ansible && ansible-playbook playbooks/configure.yml
+          --limit garage
+          --check --diff
+          -e step_ca_url=${STEP_CA_URL}
+          -e step_ca_fingerprint=${STEP_CA_FINGERPRINT}

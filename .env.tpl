@@ -24,7 +24,6 @@ export GARAGE_ADMIN_TOKEN={{ op://homelab/Garage Admin Token/credential }}
 export GARAGE_CADDY_ACCESS_KEY={{ op://homelab/Caddy Garage S3/access-key-id}}
 export GARAGE_CADDY_SECRET_KEY={{ op://homelab/Caddy Garage S3/secret-access-key}}
 
-export TECHNITIUM_ADMIN_PASSWORD={{ op://homelab/Technitium Admin/password }}
 
 export AUTHELIA_JWT_SECRET={{ op://homelab/Authelia/jwt_secret }}
 export AUTHELIA_SESSION_SECRET={{ op://homelab/Authelia/session_secret }}
@@ -36,13 +35,10 @@ export POSTGRES_ADMIN_PASSWORD={{ op://homelab/PostgreSQL Admin/password }}
 export VALKEY_PASSWORD={{ op://homelab/Valkey/password }}
 
 export STEP_CA_PASSWORD={{ op://homelab/Step CA/password }}
-export STEP_CA_URL=https://10.40.1.3:8443
+export STEP_CA_URL=https://step-ca.infra.the-lab.zone:8443
 export STEP_CA_FINGERPRINT={{ op://homelab/Step CA/fingerprint }}
 
-export TRUENAS_SSH_HOST={{ op://homelab/TrueNAS root Ssh Key/host}}
-export TRUENAS_SSH_PORT=2223
-export TRUENAS_SSH_USERNAME={{ op://homelab/TrueNAS root Ssh Key/username}}
-export TRUENAS_SSH_PRIVATE_KEY="{{ op://homelab/TrueNAS root Ssh Key/private key?ssh-format=openssh}}"
-export TRUENAS_SSH_HOST_KEY_FINGERPRINT={{ op://homelab/TrueNAS root Ssh Key/host-fingerprints/ECDSA}}
 
 export GITEA_DB_PASSWORD={{ op://homelab/Gitea Database/password }}
+
+export SSH_PUBLIC_KEY="{{ op://homelab/SSH Key Proxmox fwfurtado/public key }}"

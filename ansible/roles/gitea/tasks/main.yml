@@ -1,0 +1,83 @@
+---
+- name: Install dependencies
+  ansible.builtin.apt:
+    name:
+      - ca-certificates
+      - curl
+      - git
+    state: present
+    update_cache: true
+
+- name: Download Gitea binary
+  ansible.builtin.get_url:
+    url: "https://dl.gitea.com/gitea/{{ gitea_version }}/gitea-{{ gitea_version }}-linux-{{ gitea_arch }}"
+    dest: /usr/local/bin/gitea
+    mode: "0755"
+  notify: restart gitea
+
+- name: Create git group
+  ansible.builtin.group:
+    name: git
+    system: true
+
+- name: Create git user
+  ansible.builtin.user:
+    name: git
+    group: git
+    system: true
+    shell: /bin/bash
+    home: /home/git
+    create_home: true
+
+- name: Create Gitea config directory
+  ansible.builtin.file:
+    path: "{{ gitea_config_dir }}"
+    state: directory
+    owner: git
+    group: git
+    mode: "0750"
+
+- name: Create Gitea data directories
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    owner: git
+    group: git
+    mode: "0750"
+  loop:
+    - "{{ gitea_data_dir }}"
+    - "{{ gitea_data_dir }}/custom"
+    - "{{ gitea_data_dir }}/data"
+    - "{{ gitea_data_dir }}/log"
+    - "{{ gitea_data_dir }}/lfs"
+
+- name: Create Gitea systemd service
+  ansible.builtin.copy:
+    dest: /etc/systemd/system/gitea.service
+    mode: "0644"
+    content: |
+      [Unit]
+      Description=Gitea (Git with a cup of tea)
+      After=network.target
+
+      [Service]
+      Type=simple
+      User=git
+      Group=git
+      WorkingDirectory={{ gitea_data_dir }}
+      ExecStart=/usr/local/bin/gitea web --config {{ gitea_config_dir }}/app.ini
+      Restart=on-failure
+      RestartSec=5
+      Environment=USER=git HOME=/home/git GITEA_WORK_DIR={{ gitea_data_dir }}
+      EnvironmentFile=-{{ gitea_config_dir }}/env
+      LimitNOFILE=1048576
+
+      [Install]
+      WantedBy=multi-user.target
+  notify: restart gitea
+
+- name: Enable Gitea service
+  ansible.builtin.systemd:
+    name: gitea
+    enabled: true
+    daemon_reload: true

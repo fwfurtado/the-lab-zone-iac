@@ -1,0 +1,6 @@
+---
+coredns_version: "1.14.1"
+coredns_arch: "amd64"
+coredns_config_dir: "/etc/coredns"
+corefile_src: "{{ playbook_dir }}/../../stacks/catalog/lxc/coredns/Corefile"
+zonefile_src: "{{ playbook_dir }}/../../stacks/catalog/lxc/coredns/the-lab.zone"

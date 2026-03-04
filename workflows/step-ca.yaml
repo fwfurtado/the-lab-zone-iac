@@ -1,8 +1,26 @@
 workflows:
   step-ca/apply:
-    description: "Apply the Step-CA stack"
+    description: "Create/update the Step-CA container infrastructure"
+    steps:
+      - command: terraform apply lxc -s step-ca -auto-approve
+
+  step-ca/configure:
+    description: "Configure Step-CA on the running container via Ansible"
     steps:
       - type: shell
         command: >-
-          sudo -E atmos packer build lxc -s step-ca
-      - command: terraform apply lxc -s step-ca -auto-approve
+          cd ansible && ansible-playbook playbooks/configure.yml
+          --limit step-ca
+          -e step_ca_password=${STEP_CA_PASSWORD}
+          -e step_ca_dns_name=step-ca.infra.the-lab.zone
+
+  step-ca/drift:
+    description: "Check configuration drift on the Step-CA container"
+    steps:
+      - type: shell
+        command: >-
+          cd ansible && ansible-playbook playbooks/configure.yml
+          --limit step-ca
+          --check --diff
+          -e step_ca_password=${STEP_CA_PASSWORD}
+          -e step_ca_dns_name=step-ca.infra.the-lab.zone

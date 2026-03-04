@@ -1,0 +1,138 @@
+---
+- name: Install prerequisites
+  ansible.builtin.apt:
+    name:
+      - ca-certificates
+      - curl
+    state: present
+    update_cache: true
+
+- name: Download step CLI deb package
+  ansible.builtin.get_url:
+    url: "https://dl.smallstep.com/gh-release/cli/gh-release-header/v{{ step_cli_version }}/step-cli_{{ step_cli_version }}-1_{{ step_ca_arch }}.deb"
+    dest: /tmp/step-cli.deb
+    mode: "0644"
+  check_mode: false
+
+- name: Install step CLI
+  ansible.builtin.apt:
+    deb: /tmp/step-cli.deb
+    state: present
+
+- name: Download step-ca deb package
+  ansible.builtin.get_url:
+    url: "https://dl.smallstep.com/gh-release/certificates/gh-release-header/v{{ step_ca_version }}/step-ca_{{ step_ca_version }}-1_{{ step_ca_arch }}.deb"
+    dest: /tmp/step-ca.deb
+    mode: "0644"
+  check_mode: false
+
+- name: Install step-ca
+  ansible.builtin.apt:
+    deb: /tmp/step-ca.deb
+    state: present
+
+- name: Create step-ca group
+  ansible.builtin.group:
+    name: step-ca
+    system: true
+
+- name: Create step-ca user
+  ansible.builtin.user:
+    name: step-ca
+    group: step-ca
+    system: true
+    shell: /usr/sbin/nologin
+    home: "{{ step_ca_home }}"
+    create_home: false
+
+- name: Ensure step-ca data directory exists
+  ansible.builtin.file:
+    path: "{{ step_ca_home }}"
+    state: directory
+    owner: step-ca
+    group: step-ca
+    mode: "0700"
+
+- name: Ensure step-ca config directory exists
+  ansible.builtin.file:
+    path: "{{ step_ca_config_dir }}"
+    state: directory
+    owner: step-ca
+    group: step-ca
+    mode: "0755"
+
+- name: Write CA password file
+  ansible.builtin.copy:
+    content: "{{ step_ca_password }}"
+    dest: "{{ step_ca_home }}/password.txt"
+    owner: step-ca
+    group: step-ca
+    mode: "0600"
+  no_log: true
+
+- name: Check if CA is already initialized
+  ansible.builtin.stat:
+    path: "{{ step_ca_home }}/config/ca.json"
+  register: ca_config_stat
+
+- name: Initialize the CA
+  ansible.builtin.command:
+    cmd: >-
+      runuser -u step-ca -- step ca init
+      --name "The Lab Zone CA"
+      --dns "{{ step_ca_dns_name }}"
+      --address "{{ step_ca_listen_addr }}"
+      --provisioner admin
+      --password-file "{{ step_ca_home }}/password.txt"
+      --deployment-type standalone
+  environment:
+    STEPPATH: "{{ step_ca_home }}"
+  when: not ca_config_stat.stat.exists
+
+- name: Add ACME provisioner
+  ansible.builtin.command:
+    cmd: >-
+      runuser -u step-ca -- step ca provisioner add acme --type ACME
+      --ca-config "{{ step_ca_home }}/config/ca.json"
+  environment:
+    STEPPATH: "{{ step_ca_home }}"
+  when: not ca_config_stat.stat.exists
+
+- name: Create step-ca systemd service
+  ansible.builtin.copy:
+    dest: /etc/systemd/system/step-ca.service
+    mode: "0644"
+    content: |
+      [Unit]
+      Description=Smallstep Certificate Authority
+      After=network.target
+
+      [Service]
+      Type=simple
+      User=step-ca
+      Group=step-ca
+      Environment=STEPPATH={{ step_ca_home }}
+      ExecStartPre=+/bin/mkdir -p {{ step_ca_home }}
+      ExecStartPre=+/bin/chown -R step-ca:step-ca {{ step_ca_home }}
+      ExecStart=/bin/step-ca {{ step_ca_home }}/config/ca.json --password-file {{ step_ca_home }}/password.txt
+      Restart=on-failure
+      RestartSec=5
+      LimitNOFILE=1048576
+
+      [Install]
+      WantedBy=multi-user.target
+  notify: restart step-ca
+
+- name: Enable step-ca service
+  ansible.builtin.systemd:
+    name: step-ca
+    enabled: true
+    daemon_reload: true
+
+- name: Cleanup download artifacts
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: absent
+  loop:
+    - /tmp/step-cli.deb
+    - /tmp/step-ca.deb

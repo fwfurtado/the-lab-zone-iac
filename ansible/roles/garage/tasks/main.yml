@@ -1,0 +1,140 @@
+---
+- name: Download Garage release
+  ansible.builtin.get_url:
+    url: "https://garagehq.deuxfleurs.fr/_releases/v{{ garage_version }}/x86_64-unknown-linux-musl/garage"
+    dest: /tmp/garage
+    mode: "0755"
+  check_mode: false
+
+- name: Install Garage binary
+  ansible.builtin.copy:
+    src: /tmp/garage
+    dest: /usr/local/bin/garage
+    remote_src: true
+    mode: "0755"
+  notify: restart garage
+
+- name: Download Garage Web UI release
+  ansible.builtin.get_url:
+    url: "https://github.com/khairul169/garage-webui/releases/download/{{ garage_webui_version }}/garage-webui-v{{ garage_webui_version }}-linux-{{ garage_arch }}"
+    dest: /tmp/garage-webui
+    mode: "0755"
+  check_mode: false
+
+- name: Install Garage Web UI binary
+  ansible.builtin.copy:
+    src: /tmp/garage-webui
+    dest: /usr/local/bin/garage-webui
+    remote_src: true
+    mode: "0755"
+  notify: restart garage-webui
+
+- name: Create garage group
+  ansible.builtin.group:
+    name: garage
+    system: true
+
+- name: Create garage user
+  ansible.builtin.user:
+    name: garage
+    group: garage
+    system: true
+    shell: /usr/sbin/nologin
+    create_home: false
+
+- name: Create Garage config directory
+  ansible.builtin.file:
+    path: "{{ garage_config_dir }}"
+    state: directory
+    owner: garage
+    group: garage
+    mode: "0755"
+
+- name: Create Garage metadata directory
+  ansible.builtin.file:
+    path: "{{ garage_meta_dir }}"
+    state: directory
+    owner: garage
+    group: garage
+    mode: "0755"
+
+- name: Create Garage data directory
+  ansible.builtin.file:
+    path: "{{ garage_data_dir }}"
+    state: directory
+    owner: garage
+    group: garage
+    mode: "0755"
+
+- name: Create Garage systemd service
+  ansible.builtin.copy:
+    dest: /etc/systemd/system/garage.service
+    mode: "0644"
+    content: |
+      [Unit]
+      Description=Garage S3-compatible object storage
+      After=network.target
+
+      [Service]
+      Type=simple
+      User=garage
+      Group=garage
+      ExecStartPre=+/bin/mkdir -p /var/lib/garage/data
+      ExecStartPre=+/bin/mkdir -p /var/lib/garage/meta
+      ExecStartPre=+/bin/chown -R garage:garage /var/lib/garage/data
+      ExecStartPre=+/bin/chown -R garage:garage /var/lib/garage/meta
+      ExecStartPre=+/bin/chmod 0755 /var/lib/garage/data
+      ExecStartPre=+/bin/chmod 0755 /var/lib/garage/meta
+      ExecStart=/usr/local/bin/garage server
+      Environment=GARAGE_CONFIG_FILE={{ garage_config_dir }}/garage.toml
+      Restart=on-failure
+      RestartSec=5
+      LimitNOFILE=1048576
+
+      [Install]
+      WantedBy=multi-user.target
+  notify: restart garage
+
+- name: Create Garage Web UI systemd service
+  ansible.builtin.copy:
+    dest: /etc/systemd/system/garage-webui.service
+    mode: "0644"
+    content: |
+      [Unit]
+      Description=Garage Web UI
+      After=network.target garage.service
+      Requires=garage.service
+
+      [Service]
+      Type=simple
+      User=garage
+      Group=garage
+      ExecStart=/usr/local/bin/garage-webui
+      Environment=CONFIG_PATH={{ garage_config_dir }}/garage.toml
+      Environment=PORT=3909
+      Restart=on-failure
+      RestartSec=5
+
+      [Install]
+      WantedBy=multi-user.target
+  notify: restart garage-webui
+
+- name: Enable Garage service
+  ansible.builtin.systemd:
+    name: garage
+    enabled: true
+    daemon_reload: true
+
+- name: Enable Garage Web UI service
+  ansible.builtin.systemd:
+    name: garage-webui
+    enabled: true
+    daemon_reload: true
+
+- name: Cleanup download artifacts
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: absent
+  loop:
+    - /tmp/garage
+    - /tmp/garage-webui

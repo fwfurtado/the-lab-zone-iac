@@ -1,5 +1,14 @@
+resource "proxmox_virtual_environment_download_file" "template" {
+  content_type        = "vztmpl"
+  datastore_id        = local.container.image.storage_id
+  node_name           = local.proxmox.node.name
+  url                 = var.template_url
+  overwrite           = false
+  overwrite_unmanaged = true
+}
+
 resource "proxmox_virtual_environment_container" "this" {
-  depends_on = [proxmox_virtual_environment_file.template]
+  depends_on = [proxmox_virtual_environment_download_file.template]
 
   description = local.container.description
   node_name   = local.proxmox.node.name
@@ -19,6 +28,10 @@ resource "proxmox_virtual_environment_container" "this" {
   initialization {
     hostname = local.container.hostname
 
+    user_account {
+      keys = var.ssh_public_keys
+    }
+
     dynamic "dns" {
       for_each = length(local.container.network.dns.servers) > 0 ? [1] : []
       content {
@@ -35,7 +48,7 @@ resource "proxmox_virtual_environment_container" "this" {
   }
 
   operating_system {
-    template_file_id = proxmox_virtual_environment_file.template.id
+    template_file_id = proxmox_virtual_environment_download_file.template.id
     type             = local.container.image.type
   }
 
@@ -72,6 +85,7 @@ resource "proxmox_virtual_environment_container" "this" {
       started,
       console,
       network_interface[0].mac_address,
+      operating_system,
     ]
   }
 }

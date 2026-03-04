@@ -1,0 +1,5 @@
+---
+step_cli_version: "0.28.6"
+step_certs_dir: "/etc/step/certs"
+step_config_dir: "/etc/step"
+step_cert_dns_suffix: "infra.the-lab.zone"

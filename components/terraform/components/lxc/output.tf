@@ -16,7 +16,7 @@ output "ip_cidr" {
 
 output "template" {
   value = {
-    id        = proxmox_virtual_environment_file.template.id
-    file_name = proxmox_virtual_environment_file.template.file_name
+    id        = proxmox_virtual_environment_download_file.template.id
+    file_name = proxmox_virtual_environment_download_file.template.file_name
   }
 }

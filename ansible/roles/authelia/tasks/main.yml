@@ -1,0 +1,87 @@
+---
+- name: Install dependencies
+  ansible.builtin.apt:
+    name:
+      - apt-transport-https
+      - ca-certificates
+      - curl
+      - gnupg
+    state: present
+    update_cache: true
+
+- name: Download Authelia GPG key
+  ansible.builtin.get_url:
+    url: https://www.authelia.com/keys/authelia-security.gpg
+    dest: /usr/share/keyrings/authelia-security.gpg
+    mode: "0644"
+    force: true
+
+- name: Add Authelia repository
+  ansible.builtin.copy:
+    dest: /etc/apt/sources.list.d/authelia.list
+    mode: "0644"
+    content: "deb [arch=amd64 signed-by=/usr/share/keyrings/authelia-security.gpg] https://apt.authelia.com stable main\n"
+
+- name: Install Authelia
+  ansible.builtin.apt:
+    name: authelia
+    state: present
+    update_cache: true
+
+- name: Create authelia group
+  ansible.builtin.group:
+    name: authelia
+    system: true
+
+- name: Create authelia user
+  ansible.builtin.user:
+    name: authelia
+    group: authelia
+    system: true
+    shell: /usr/sbin/nologin
+    create_home: false
+
+- name: Create Authelia config directory
+  ansible.builtin.file:
+    path: "{{ authelia_config_dir }}"
+    state: directory
+    owner: authelia
+    group: authelia
+    mode: "0750"
+
+- name: Create Authelia data directory
+  ansible.builtin.file:
+    path: "{{ authelia_data_dir }}"
+    state: directory
+    owner: authelia
+    group: authelia
+    mode: "0750"
+
+- name: Create Authelia systemd service
+  ansible.builtin.copy:
+    dest: /etc/systemd/system/authelia.service
+    mode: "0644"
+    content: |
+      [Unit]
+      Description=Authelia Authentication Server
+      After=network.target
+
+      [Service]
+      Type=simple
+      User=authelia
+      Group=authelia
+      ExecStart=/usr/bin/authelia --config {{ authelia_config_dir }}/configuration.yml --config.experimental.filters template
+      Restart=on-failure
+      RestartSec=5
+      EnvironmentFile=-{{ authelia_config_dir }}/env
+      LimitNOFILE=1048576
+
+      [Install]
+      WantedBy=multi-user.target
+  notify: restart authelia
+
+- name: Enable Authelia service
+  ansible.builtin.systemd:
+    name: authelia
+    enabled: true
+    daemon_reload: true

@@ -1,0 +1,5 @@
+---
+postgres_major_version: "18"
+pg_supported_majors:
+  - "18"
+pg_data_dir: "/var/lib/postgresql/data"

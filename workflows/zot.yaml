@@ -1,8 +1,30 @@
 workflows:
   zot/apply:
-    description: "Apply the Zot stack"
+    description: "Create/update the Zot container infrastructure"
+    steps:
+      - command: terraform apply lxc -s zot -auto-approve
+
+  zot/configure:
+    description: "Configure Zot on the running container via Ansible"
     steps:
       - type: shell
         command: >-
-          sudo -E atmos packer build lxc -s zot
-      - command: terraform apply lxc -s zot -auto-approve
+          cd ansible && ansible-playbook playbooks/configure.yml
+          --limit zot
+          -e zot_username=${ZOT_IMAGE_REGISTRY_USERNAME}
+          -e zot_password=${ZOT_IMAGE_REGISTRY_PASSWORD}
+          -e step_ca_url=${STEP_CA_URL}
+          -e step_ca_fingerprint=${STEP_CA_FINGERPRINT}
+
+  zot/drift:
+    description: "Check configuration drift on the Zot container"
+    steps:
+      - type: shell
+        command: >-
+          cd ansible && ansible-playbook playbooks/configure.yml
+          --limit zot
+          --check --diff
+          -e zot_username=${ZOT_IMAGE_REGISTRY_USERNAME}
+          -e zot_password=${ZOT_IMAGE_REGISTRY_PASSWORD}
+          -e step_ca_url=${STEP_CA_URL}
+          -e step_ca_fingerprint=${STEP_CA_FINGERPRINT}

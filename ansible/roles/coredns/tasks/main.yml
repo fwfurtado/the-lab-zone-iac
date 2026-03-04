@@ -1,0 +1,98 @@
+---
+- name: Download CoreDNS release
+  ansible.builtin.get_url:
+    url: "https://github.com/coredns/coredns/releases/download/v{{ coredns_version }}/coredns_{{ coredns_version }}_linux_{{ coredns_arch }}.tgz"
+    dest: /tmp/coredns.tgz
+  check_mode: false
+
+- name: Extract CoreDNS binary
+  ansible.builtin.unarchive:
+    src: /tmp/coredns.tgz
+    dest: /tmp
+    remote_src: true
+
+- name: Install CoreDNS binary
+  ansible.builtin.copy:
+    src: /tmp/coredns
+    dest: /usr/local/bin/coredns
+    remote_src: true
+    mode: "0755"
+  notify: restart coredns
+
+- name: Create coredns group
+  ansible.builtin.group:
+    name: coredns
+    system: true
+
+- name: Create coredns user
+  ansible.builtin.user:
+    name: coredns
+    group: coredns
+    system: true
+    shell: /usr/sbin/nologin
+    create_home: false
+
+- name: Create CoreDNS config directory
+  ansible.builtin.file:
+    path: "{{ coredns_config_dir }}"
+    state: directory
+    owner: coredns
+    group: coredns
+    mode: "0755"
+
+- name: Copy Corefile
+  ansible.builtin.copy:
+    src: "{{ corefile_src }}"
+    dest: "{{ coredns_config_dir }}/Corefile"
+    owner: coredns
+    group: coredns
+    mode: "0644"
+  notify: restart coredns
+
+- name: Copy zone file
+  ansible.builtin.copy:
+    src: "{{ zonefile_src }}"
+    dest: "{{ coredns_config_dir }}/the-lab.zone"
+    owner: coredns
+    group: coredns
+    mode: "0644"
+  notify: restart coredns
+  tags: zone
+
+- name: Create CoreDNS systemd service
+  ansible.builtin.copy:
+    dest: /etc/systemd/system/coredns.service
+    mode: "0644"
+    content: |
+      [Unit]
+      Description=CoreDNS DNS Server
+      After=network.target
+
+      [Service]
+      Type=simple
+      User=coredns
+      Group=coredns
+      ExecStart=/usr/local/bin/coredns -conf {{ coredns_config_dir }}/Corefile
+      Restart=on-failure
+      RestartSec=5
+      LimitNOFILE=1048576
+      AmbientCapabilities=CAP_NET_BIND_SERVICE
+      CapabilityBoundingSet=CAP_NET_BIND_SERVICE
+
+      [Install]
+      WantedBy=multi-user.target
+  notify: restart coredns
+
+- name: Enable CoreDNS service
+  ansible.builtin.systemd:
+    name: coredns
+    enabled: true
+    daemon_reload: true
+
+- name: Cleanup download artifacts
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: absent
+  loop:
+    - /tmp/coredns.tgz
+    - /tmp/coredns

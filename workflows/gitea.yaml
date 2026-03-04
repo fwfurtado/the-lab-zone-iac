@@ -1,17 +1,34 @@
 workflows:
   gitea/apply:
-    description: "Apply the Gitea stack"
+    description: "Create/update the Gitea container infrastructure"
     steps:
-      - type: shell
-        command: >-
-          sudo -E atmos packer build lxc -s gitea
       - command: terraform apply garage-bucket -s gitea -auto-approve
       - command: terraform apply postgresql-database -s gitea -auto-approve
       - command: terraform apply lxc -s gitea -auto-approve
-      - command: workflow gitea/deploy-config
+
+  gitea/configure:
+    description: "Configure Gitea on the running container via Ansible"
+    steps:
+      - type: shell
+        command: >-
+          cd ansible && ansible-playbook playbooks/configure.yml
+          --limit gitea
+          -e step_ca_url=${STEP_CA_URL}
+          -e step_ca_fingerprint=${STEP_CA_FINGERPRINT}
+
+  gitea/drift:
+    description: "Check configuration drift on the Gitea container"
+    steps:
+      - type: shell
+        command: >-
+          cd ansible && ansible-playbook playbooks/configure.yml
+          --limit gitea
+          --check --diff
+          -e step_ca_url=${STEP_CA_URL}
+          -e step_ca_fingerprint=${STEP_CA_FINGERPRINT}
 
   gitea/deploy-config:
-    description: "Deploy Gitea config and secrets to the running container without rebuild"
+    description: "Deploy Gitea config and secrets to the running container"
     steps:
       - type: shell
         command: >-

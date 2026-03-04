@@ -1,21 +1,36 @@
 workflows:
   caddy/apply:
-    description: "Apply the Caddy stack"
+    description: "Create/update the Caddy container infrastructure"
+    steps:
+      - command: terraform apply lxc -s caddy -auto-approve
+
+  caddy/configure:
+    description: "Configure Caddy on the running container via Ansible"
     steps:
       - type: shell
         command: >-
-          caddy fmt --overwrite stacks/catalog/lxc/caddy/Caddyfile && echo "✅ Caddyfile was successfully formatted" || echo "❌ Caddyfile was not formatted"
+          cd ansible && ansible-playbook playbooks/configure.yml
+          --limit caddy
+          -e step_ca_url=${STEP_CA_URL}
+          -e step_ca_fingerprint=${STEP_CA_FINGERPRINT}
+
+  caddy/drift:
+    description: "Check configuration drift on the Caddy container"
+    steps:
       - type: shell
         command: >-
-          sudo -E atmos packer build lxc -s caddy
-      - command: terraform apply lxc -s caddy -auto-approve
+          cd ansible && ansible-playbook playbooks/configure.yml
+          --limit caddy
+          --check --diff
+          -e step_ca_url=${STEP_CA_URL}
+          -e step_ca_fingerprint=${STEP_CA_FINGERPRINT}
 
   caddy/deploy-config:
     description: "Deploy the Caddyfile to the running container and reload Caddy"
     steps:
       - type: shell
         command: >-
-          caddy fmt --overwrite stacks/catalog/lxc/caddy/Caddyfile && echo "✅ Caddyfile was successfully formatted" || echo "❌ Caddyfile was not formatted"
+          caddy fmt --overwrite stacks/catalog/lxc/caddy/Caddyfile && echo "Caddyfile was successfully formatted" || echo "Caddyfile was not formatted"
       - type: shell
         command: >-
           op inject -i stacks/catalog/lxc/caddy/Caddyfile -o /tmp/Caddyfile
