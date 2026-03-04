@@ -1,5 +1,5 @@
 ---
-zot_version: "2.1.11"
+zot_version: "2.1.14"
 zot_arch: "amd64"
 zot_config_dir: "/etc/zot"
 zot_data_dir: "/var/lib/zot"
