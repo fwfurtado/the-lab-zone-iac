@@ -6,8 +6,12 @@
     - name: Apply common role
       ansible.builtin.include_role:
         name: common
+      tags:
+        - always
       when: use_common_role | default(true)
 
     - name: Apply app-specific role
       ansible.builtin.include_role:
         name: "{{ app_role }}"
+      tags:
+        - always
