@@ -7,12 +7,14 @@ provider "postgresql" {
 }
 
 resource "postgresql_role" "this" {
-  name     = var.database_user
+  for_each = var.databases
+  name     = each.value.user
   login    = true
-  password = var.database_password
+  password = each.value.password
 }
 
 resource "postgresql_database" "this" {
-  name  = var.database_name
-  owner = postgresql_role.this.name
+  for_each = var.databases
+  name     = each.key
+  owner    = postgresql_role.this[each.key].name
 }

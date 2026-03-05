@@ -1,9 +1,9 @@
-metadata_dir = "/var/lib/garage/meta"
-data_dir = "/var/lib/garage/data"
+metadata_dir = "{{ garage_meta_dir }}"
+data_dir = "{{ garage_data_dir }}"
 
 replication_factor = 1
 
-rpc_secret = "{{ tpl_args.rpc_secret }}"
+rpc_secret = "{{ garage_rpc_secret }}"
 rpc_bind_addr = "[::]:3901"
 
 [s3_api]
@@ -18,4 +18,4 @@ index = "index.html"
 
 [admin]
 api_bind_addr = "[::]:3903"
-admin_token = "{{ tpl_args.admin_token }}"
+admin_token = "{{ garage_admin_token }}"

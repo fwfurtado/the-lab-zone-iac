@@ -5,6 +5,26 @@ import:
 
 components:
   terraform:
+    garage-bucket:
+      component: garage-bucket
+      metadata:
+        terraform_workspace: "{{ .stack }}-{{ .component }}"
+      vars:
+        garage_host: "10.40.1.11:3903"
+        garage_admin_token: !env GARAGE_ADMIN_TOKEN
+        nodes:
+          - id: !env GARAGE_NODE_ID
+            zone: "dc1"
+            capacity: "100G"
+        keys:
+          gitea:
+            bucket_names: ["gitea", "gitea-lfs"]
+        buckets:
+          gitea:
+            website: false
+          gitea-lfs:
+            website: false
+
     lxc:
       metadata:
         component: lxc
@@ -18,11 +38,11 @@ components:
         ssh_public_keys:
           - !env SSH_PUBLIC_KEY
         container:
-          id: 110
+          id: 111
           hostname: "garage"
           description: "Garage S3"
           network:
-            ip_cidr: "10.40.1.10/21"
+            ip_cidr: "10.40.1.11/21"
             dns:
               servers: ["10.40.1.2", "1.1.1.1", "1.0.0.1"]
           tags:

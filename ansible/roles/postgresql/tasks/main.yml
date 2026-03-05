@@ -74,6 +74,7 @@
     marker: "# {mark} ANSIBLE MANAGED BLOCK - LAB NETWORK ACCESS"
     block: |
       host    all             all             10.40.0.0/21           scram-sha-256
+      host    all             all             192.168.10.0/24        scram-sha-256
   notify: restart postgresql
 
 - name: Ensure dedicated PostgreSQL data directory exists

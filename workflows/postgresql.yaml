@@ -16,6 +16,11 @@ workflows:
           -e step_ca_url=${STEP_CA_URL}
           -e step_ca_fingerprint=${STEP_CA_FINGERPRINT}
 
+  postgresql/provision:
+    description: "Create databases and roles on the PostgreSQL server"
+    steps:
+      - command: terraform apply postgresql-database -s postgresql -auto-approve
+
   postgresql/drift:
     description: "Check configuration drift on the PostgreSQL container"
     steps:

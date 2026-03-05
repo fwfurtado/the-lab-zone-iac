@@ -21,6 +21,10 @@ export ZOT_IMAGE_REGISTRY_PASSWORD={{ op://homelab/Zot K8s/password}}
 
 export GARAGE_RPC_SECRET={{ op://homelab/Garage RPC Secret/secret }}
 export GARAGE_ADMIN_TOKEN={{ op://homelab/Garage Admin Token/credential }}
+
+# <run: ssh root@10.40.1.11 "GARAGE_CONFIG_FILE=/etc/garage/garage.toml garage node id" | cut -c1-64>
+export GARAGE_NODE_ID="d2729bbe8bd1d6a3cd1c5ddd85362cb545579cc6aa78ed9045b898413e6543ee"
+
 export GARAGE_CADDY_ACCESS_KEY={{ op://homelab/Caddy Garage S3/access-key-id}}
 export GARAGE_CADDY_SECRET_KEY={{ op://homelab/Caddy Garage S3/secret-access-key}}
 

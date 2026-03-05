@@ -2,8 +2,6 @@ workflows:
   gitea/apply:
     description: "Create/update the Gitea container infrastructure"
     steps:
-      - command: terraform apply garage-bucket -s gitea -auto-approve
-      - command: terraform apply postgresql-database -s gitea -auto-approve
       - command: terraform apply lxc -s gitea -auto-approve
 
   gitea/configure:
@@ -35,16 +33,13 @@ workflows:
           op inject -i stacks/catalog/lxc/gitea/app.ini -o /tmp/gitea-app.ini
       - type: shell
         command: >-
-          scp
-          /tmp/gitea-app.ini
-          ${PROXMOX_SSH_USERNAME}@${PROXMOX_SSH_HOST}:/tmp/
+          scp /tmp/gitea-app.ini root@10.40.1.21:/etc/gitea/app.ini
       - type: shell
         command: >-
-          ssh ${PROXMOX_SSH_USERNAME}@${PROXMOX_SSH_HOST}
-          "sudo pct push 120 /tmp/gitea-app.ini /etc/gitea/app.ini --perms 0640
-          && sudo pct exec 120 -- chown git:git /etc/gitea/app.ini
-          && sudo pct exec 120 -- systemctl restart gitea
-          && rm -f /tmp/gitea-app.ini"
+          ssh root@10.40.1.21
+          "chown git:git /etc/gitea/app.ini
+          && chmod 0640 /etc/gitea/app.ini
+          && systemctl restart gitea"
       - type: shell
         command: >-
           rm -f /tmp/gitea-app.ini

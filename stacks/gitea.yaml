@@ -5,33 +5,10 @@ import:
 
 components:
   terraform:
-    garage-bucket:
-      component: garage-bucket
-      metadata:
-        terraform_workspace: "{{ .stack }}-{{ .component }}"
-      vars:
-        garage_host: "10.40.1.10:3903"
-        garage_admin_token: !env GARAGE_ADMIN_TOKEN
-        key_name: gitea
-        bucket_names:
-          - gitea
-          - gitea-lfs
-
-    postgresql-database:
-      component: postgresql-database
-      metadata:
-        terraform_workspace: "{{ .stack }}-{{ .component }}"
-      vars:
-        postgresql_host: "10.40.1.41"
-        postgresql_admin_password: !env POSTGRES_ADMIN_PASSWORD
-        database_name: gitea
-        database_user: gitea
-        database_password: !env GITEA_DB_PASSWORD
-
     lxc:
       metadata:
         component: lxc
-        terraform_workspace: "{{ .stack }}-{{ .component }}"
+        terraform_workspace: "{{ .stack }}"
       vars:
         proxmox_node_name: !env PROXMOX_SSH_NODE_NAME
         proxmox_host: !env PROXMOX_SSH_HOST
@@ -41,11 +18,11 @@ components:
         ssh_public_keys:
           - !env SSH_PUBLIC_KEY
         container:
-          id: 120
+          id: 1121
           hostname: "gitea"
           description: "Gitea"
           network:
-            ip_cidr: "10.40.1.20/21"
+            ip_cidr: "10.40.1.21/21"
             dns:
               servers: ["10.40.1.2", "1.1.1.1", "1.0.0.1"]
           tags:

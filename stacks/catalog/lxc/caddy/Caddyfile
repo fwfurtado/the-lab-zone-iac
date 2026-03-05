@@ -27,7 +27,7 @@
 	layer4 {
 		:22 {
 			route {
-				proxy "10.40.1.20:22"
+				proxy "10.40.1.21:22"
 			}
 		}
 	}
@@ -71,20 +71,20 @@ unifi.infra.the-lab.zone {
 	}
 }
 
-garage.infra.the-lab.zone {
+admin.s3.infra.the-lab.zone {
 	forward_auth http://10.40.1.4:9091 {
 		uri /api/authz/forward-auth
 		copy_headers Remote-User Remote-Groups Remote-Name Remote-Email
 	}
-	reverse_proxy http://10.40.1.10:3909
+	reverse_proxy http://10.40.1.11:3909
 }
 
 s3.infra.the-lab.zone {
-	reverse_proxy http://10.40.1.10:3900
+	reverse_proxy http://10.40.1.11:3900
 }
 
 git.infra.the-lab.zone {
-	reverse_proxy http://10.40.1.20:3000
+	reverse_proxy http://10.40.1.21:3000
 }
 
 auth.infra.the-lab.zone {
@@ -108,7 +108,7 @@ haos.the-lab.zone {
 # ══════════════════════════════════════════════════════════════════════════════
 
 *.web.the-lab.zone {
-	reverse_proxy http://10.40.1.10:3902
+	reverse_proxy http://10.40.1.11:3902
 }
 
 # ══════════════════════════════════════════════════════════════════════════════

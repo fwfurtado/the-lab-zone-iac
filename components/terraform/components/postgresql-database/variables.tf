@@ -20,18 +20,10 @@ variable "postgresql_admin_password" {
   sensitive   = true
 }
 
-variable "database_name" {
-  type        = string
-  description = "The name of the database to create"
-}
-
-variable "database_user" {
-  type        = string
-  description = "The name of the role to create as owner of the database"
-}
-
-variable "database_password" {
-  type        = string
-  description = "The password for the database role"
-  sensitive   = true
+variable "databases" {
+  type = map(object({
+    user     = string
+    password = string
+  }))
+  description = "Map of database_name => { user, password } to create"
 }

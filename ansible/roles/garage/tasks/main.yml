@@ -50,6 +50,15 @@
     group: garage
     mode: "0755"
 
+- name: Deploy garage.toml configuration
+  ansible.builtin.template:
+    src: garage.toml.j2
+    dest: "{{ garage_config_dir }}/garage.toml"
+    owner: garage
+    group: garage
+    mode: "0640"
+  notify: restart garage
+
 - name: Create Garage metadata directory
   ansible.builtin.file:
     path: "{{ garage_meta_dir }}"

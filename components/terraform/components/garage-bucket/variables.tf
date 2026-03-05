@@ -14,12 +14,28 @@ variable "garage_admin_token" {
   sensitive   = true
 }
 
-variable "key_name" {
-  type        = string
-  description = "Name for the S3 access key"
+variable "nodes" {
+  type = list(object({
+    id       = string
+    zone     = string
+    capacity = string
+    tags     = optional(list(string), [])
+  }))
+  description = "Cluster node roles for layout"
+  default     = []
 }
 
-variable "bucket_names" {
-  type        = list(string)
-  description = "List of bucket global aliases to create"
+variable "keys" {
+  type = map(object({
+    bucket_names = list(string)
+  }))
+  description = "Map of key_name => { bucket_names } to create and bind"
+}
+
+variable "buckets" {
+  type = map(object({
+    website         = optional(bool, false)
+    expiration_days = optional(number, 0)
+  }))
+  description = "Map of bucket_name => { website, expiration_days } to create"
 }

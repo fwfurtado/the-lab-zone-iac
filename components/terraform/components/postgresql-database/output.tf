@@ -1,15 +1,10 @@
-output "database_name" {
-  value = postgresql_database.this.name
-}
-
-output "database_user" {
-  value = postgresql_role.this.name
-}
-
-output "database_host" {
-  value = var.postgresql_host
-}
-
-output "database_port" {
-  value = var.postgresql_port
+output "databases" {
+  value = {
+    for name, db in postgresql_database.this : name => {
+      name = db.name
+      user = postgresql_role.this[name].name
+      host = var.postgresql_host
+      port = var.postgresql_port
+    }
+  }
 }

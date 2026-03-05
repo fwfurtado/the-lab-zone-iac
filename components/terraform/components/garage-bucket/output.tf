@@ -1,9 +1,10 @@
-output "access_key_id" {
-  value = garage_key.this.access_key_id
-}
-
-output "secret_access_key" {
-  value     = garage_key.this.secret_access_key
+output "keys" {
+  value = {
+    for name, key in garage_key.this : name => {
+      access_key_id     = key.access_key_id
+      secret_access_key = key.secret_access_key
+    }
+  }
   sensitive = true
 }
 

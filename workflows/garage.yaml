@@ -11,8 +11,15 @@ workflows:
         command: >-
           cd ansible && ansible-playbook playbooks/configure.yml
           --limit garage
+          -e garage_rpc_secret=${GARAGE_RPC_SECRET}
+          -e garage_admin_token=${GARAGE_ADMIN_TOKEN}
           -e step_ca_url=${STEP_CA_URL}
           -e step_ca_fingerprint=${STEP_CA_FINGERPRINT}
+
+  garage/provision:
+    description: "Apply cluster layout and create buckets/keys"
+    steps:
+      - command: terraform apply garage-bucket -s garage -auto-approve
 
   garage/drift:
     description: "Check configuration drift on the Garage container"
@@ -22,5 +29,7 @@ workflows:
           cd ansible && ansible-playbook playbooks/configure.yml
           --limit garage
           --check --diff
+          -e garage_rpc_secret=${GARAGE_RPC_SECRET}
+          -e garage_admin_token=${GARAGE_ADMIN_TOKEN}
           -e step_ca_url=${STEP_CA_URL}
           -e step_ca_fingerprint=${STEP_CA_FINGERPRINT}

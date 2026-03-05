@@ -17,3 +17,10 @@ provider "registry.terraform.io/arsolitt/garagehq" {
     "zh:d722dd942cc2a5438ba2cd02dd78e63ca14935064f01a6caee31cd8aca945caf",
   ]
 }
+
+provider "registry.terraform.io/hashicorp/null" {
+  version = "3.2.4"
+  hashes = [
+    "h1:hkf5w5B6q8e2A42ND2CjAvgvSN3puAosDmOJb3zCVQM=",
+  ]
+}
