@@ -13,9 +13,6 @@ components:
         postgresql_host: "10.40.1.41"
         postgresql_admin_password: !env POSTGRES_ADMIN_PASSWORD
         databases:
-          gitea:
-            user: gitea
-            password: !env GITEA_DB_PASSWORD
           forgejo:
             user: forgejo
             password: !env FORGEJO_DB_PASSWORD

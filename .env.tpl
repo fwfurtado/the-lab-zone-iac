@@ -42,8 +42,6 @@ export STEP_CA_PASSWORD={{ op://homelab/Step CA/password }}
 export STEP_CA_URL=https://step-ca.infra.the-lab.zone:8443
 export STEP_CA_FINGERPRINT={{ op://homelab/Step CA/fingerprint }}
 
-
-export GITEA_DB_PASSWORD={{ op://homelab/Gitea Database/password }}
 export FORGEJO_DB_PASSWORD={{ op://homelab/Forgejo Database/password }}
 
 export SSH_PUBLIC_KEY="{{ op://homelab/SSH Key Proxmox fwfurtado/public key }}"

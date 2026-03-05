@@ -52,19 +52,6 @@ identity_providers:
       - key: |
 {{ secret "/etc/authelia/jwks.pem" | indent 10 }}
     clients:
-      - client_id: gitea
-        client_name: Gitea
-        client_secret: '{{ env "AUTH_GITEA_OIDC_CLIENT_SECRET" }}'
-        consent_mode: implicit
-        redirect_uris:
-          - https://git.infra.the-lab.zone/user/oauth2/authelia/callback
-        scopes:
-          - openid
-          - profile
-          - email
-          - groups
-        token_endpoint_auth_method: client_secret_post
-
       - client_id: forgejo
         client_name: Forgejo
         client_secret: '{{ env "AUTH_FORGEJO_OIDC_CLIENT_SECRET" }}'

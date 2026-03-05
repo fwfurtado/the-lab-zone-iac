@@ -27,7 +27,7 @@
 	layer4 {
 		:22 {
 			route {
-				proxy "10.40.1.21:22"
+				proxy "10.40.1.22:22"
 			}
 		}
 	}
@@ -81,10 +81,6 @@ admin.s3.infra.the-lab.zone {
 
 s3.infra.the-lab.zone {
 	reverse_proxy http://10.40.1.11:3900
-}
-
-git.infra.the-lab.zone {
-	reverse_proxy http://10.40.1.21:3000
 }
 
 forgejo.the-lab.zone {
