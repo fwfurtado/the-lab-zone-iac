@@ -24,6 +24,8 @@ zot.infra       IN A     10.40.1.31
 postgresql.infra IN A     10.40.1.41
 valkey.infra    IN A     10.40.1.42
 
+git.forgejo    IN CNAME forgejo.infra.the-lab.zone.
+
 *         IN CNAME ingress.the-lab.zone.
 
 $ORIGIN infra.the-lab.zone.
