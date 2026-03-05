@@ -32,6 +32,6 @@ components:
           image: {}
           resources:
             cpu: 2
-            memory: 2048
+            memory: 4096
             disk:
               size: 5

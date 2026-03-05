@@ -18,7 +18,10 @@
 	# }
 
 	# ── ACME via Cloudflare DNS challenge ──
-	acme_dns cloudflare "{{ op://development/Cloudflare/the-lab.zone }}"
+	cert_issuer acme {
+		dns cloudflare "{{ op://development/Cloudflare/the-lab.zone }}"
+		resolvers 1.1.1.1 1.0.0.1
+	}
 
 	# ── Layer4 for SSH passthrough ──
 	layer4 {

@@ -4,6 +4,17 @@ workflows:
     steps:
       - command: terraform apply lxc -s caddy -auto-approve
 
+  caddy/bootstrap:
+    description: "First-time configure Caddy (sshd still on port 22)"
+    steps:
+      - type: shell
+        command: >-
+          cd ansible && ansible-playbook playbooks/configure.yml
+          --limit caddy
+          -e ansible_port=22
+          -e step_ca_url=${STEP_CA_URL}
+          -e step_ca_fingerprint=${STEP_CA_FINGERPRINT}
+
   caddy/configure:
     description: "Configure Caddy on the running container via Ansible"
     steps:

@@ -11,7 +11,7 @@ $TTL 3600
 
     IN NS ns1.the-lab.zone.
 
-ns1             IN A     10.40.1.83
+ns1             IN A     10.40.1.2
 ingress         IN A     10.40.1.1
 caddy.infra     IN A     10.40.1.1
 coredns.infra   IN A     10.40.1.2

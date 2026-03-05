@@ -103,3 +103,44 @@
     name: caddy
     enabled: true
     daemon_reload: true
+
+- name: Configure sshd to listen on port 2222
+  ansible.builtin.copy:
+    content: |
+      Port 2222
+    dest: /etc/ssh/sshd_config.d/port.conf
+    mode: "0644"
+
+- name: Create ssh.socket override directory
+  ansible.builtin.file:
+    path: /etc/systemd/system/ssh.socket.d
+    state: directory
+    mode: "0755"
+
+- name: Override ssh.socket to listen on port 2222
+  ansible.builtin.copy:
+    content: |
+      [Socket]
+      ListenStream=
+      ListenStream=2222
+    dest: /etc/systemd/system/ssh.socket.d/override.conf
+    mode: "0644"
+  notify: restart sshd
+
+- name: Create step-renewer override directory
+  ansible.builtin.file:
+    path: /etc/systemd/system/step-renewer.service.d
+    state: directory
+    mode: "0755"
+
+- name: Override step-renewer to stop Caddy during ACME challenge
+  ansible.builtin.copy:
+    content: |
+      [Service]
+      ExecStartPre=
+      ExecStartPre=/bin/systemctl stop caddy
+      ExecStartPre=/bin/sh -c 'test -f /etc/step/certs/srv.crt || /bin/step ca certificate "$$(hostname).infra.the-lab.zone" /etc/step/certs/srv.crt /etc/step/certs/srv.key --provisioner acme --force'
+      ExecStartPost=/bin/systemctl start caddy
+    dest: /etc/systemd/system/step-renewer.service.d/override.conf
+    mode: "0644"
+  notify: restart step-renewer after override
