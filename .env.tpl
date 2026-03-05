@@ -44,5 +44,10 @@ export STEP_CA_FINGERPRINT={{ op://homelab/Step CA/fingerprint }}
 
 
 export GITEA_DB_PASSWORD={{ op://homelab/Gitea Database/password }}
+export FORGEJO_DB_PASSWORD={{ op://homelab/Forgejo Database/password }}
 
 export SSH_PUBLIC_KEY="{{ op://homelab/SSH Key Proxmox fwfurtado/public key }}"
+
+export FORGEJO_ADMIN_USERNAME={{ op://homelab/Forgejo Admin/username }}
+export FORGEJO_ADMIN_PASSWORD={{ op://homelab/Forgejo Admin/password }}
+export FORGEJO_ADMIN_EMAIL={{ op://homelab/Forgejo Admin/email }}

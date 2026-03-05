@@ -64,3 +64,16 @@ identity_providers:
           - email
           - groups
         token_endpoint_auth_method: client_secret_post
+
+      - client_id: forgejo
+        client_name: Forgejo
+        client_secret: '{{ env "AUTH_FORGEJO_OIDC_CLIENT_SECRET" }}'
+        consent_mode: implicit
+        redirect_uris:
+          - https://forgejo.the-lab.zone/user/oauth2/authelia/callback
+        scopes:
+          - openid
+          - profile
+          - email
+          - groups
+        token_endpoint_auth_method: client_secret_post

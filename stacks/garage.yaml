@@ -19,11 +19,21 @@ components:
         keys:
           gitea:
             bucket_names: ["gitea", "gitea-lfs"]
+          forgejo:
+            bucket_names: ["forgejo", "forgejo-lfs"]
+          assets:
+            bucket_names: ["assets"]
         buckets:
           gitea:
             website: false
           gitea-lfs:
             website: false
+          forgejo:
+            website: false
+          forgejo-lfs:
+            website: false
+          assets:
+            website: true
 
     lxc:
       metadata:

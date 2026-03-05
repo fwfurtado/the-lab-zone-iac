@@ -5,21 +5,6 @@ import:
 
 components:
   terraform:
-    postgresql-database:
-      component: postgresql-database
-      metadata:
-        terraform_workspace: "{{ .stack }}-{{ .component }}"
-      vars:
-        postgresql_host: "10.40.1.41"
-        postgresql_admin_password: !env POSTGRES_ADMIN_PASSWORD
-        databases:
-          gitea:
-            user: gitea
-            password: !env GITEA_DB_PASSWORD
-          forgejo:
-            user: forgejo
-            password: !env FORGEJO_DB_PASSWORD
-
     lxc:
       metadata:
         component: lxc
@@ -33,11 +18,11 @@ components:
         ssh_public_keys:
           - !env SSH_PUBLIC_KEY
         container:
-          id: 141
-          hostname: "postgresql"
-          description: "PostgreSQL"
+          id: 122
+          hostname: "forgejo"
+          description: "Forgejo"
           network:
-            ip_cidr: "10.40.1.41/21"
+            ip_cidr: "10.40.1.22/21"
             dns:
               servers: ["10.40.1.2", "1.1.1.1", "1.0.0.1"]
           tags:
@@ -47,11 +32,11 @@ components:
           image: {}
           resources:
             cpu: 2
-            memory: 4096
+            memory: 2048
             disk:
               size: 10
           mount_points:
-            - volume: "ssd-standard:100"
-              path: "/var/lib/postgresql/data"
-              size: "100G"
+            - volume: "ssd-standard:50"
+              path: "/var/lib/forgejo"
+              size: "50G"
               backup: true

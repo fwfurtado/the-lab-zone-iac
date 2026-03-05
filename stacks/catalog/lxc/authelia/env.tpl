@@ -3,3 +3,4 @@ AUTH_SESSION_SECRET={{ op://homelab/Authelia/session_secret }}
 AUTH_STORAGE_ENCRYPTION_KEY={{ op://homelab/Authelia/storage_encryption_key }}
 AUTH_OIDC_HMAC_SECRET={{ op://homelab/Authelia/oidc_hmac_secret }}
 AUTH_GITEA_OIDC_CLIENT_SECRET={{ op://homelab/Authelia/gitea_oidc_client_secret_hash }}
+AUTH_FORGEJO_OIDC_CLIENT_SECRET={{ op://homelab/Authelia/forgejo_oidc_client_secret_hash }}

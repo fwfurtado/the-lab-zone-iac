@@ -87,6 +87,10 @@ git.infra.the-lab.zone {
 	reverse_proxy http://10.40.1.21:3000
 }
 
+forgejo.the-lab.zone {
+	reverse_proxy http://10.40.1.22:3000
+}
+
 auth.infra.the-lab.zone {
 	reverse_proxy http://10.40.1.4:9091
 }

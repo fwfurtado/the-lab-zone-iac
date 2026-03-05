@@ -69,10 +69,11 @@ resource "null_resource" "website_access" {
 
   provisioner "local-exec" {
     command = <<-EOT
-      curl -sf -X PUT \
+      curl -sf -X POST \
         -H "Authorization: Bearer ${var.garage_admin_token}" \
-        "http://${var.garage_host}/v2/PutBucketWebsite" \
-        -d '{"id": "${garage_bucket.this[each.key].id}"}'
+        -H "Content-Type: application/json" \
+        "http://${var.garage_host}/v2/UpdateBucket?id=${garage_bucket.this[each.key].id}" \
+        -d '{"websiteAccess": {"enabled": true, "indexDocument": "index.html"}}'
     EOT
   }
 }
