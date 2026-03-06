@@ -7,3 +7,4 @@ users:
     password: "{{ op://homelab/Authelia/password_hash }}"
     groups:
       - admins
+      - sre

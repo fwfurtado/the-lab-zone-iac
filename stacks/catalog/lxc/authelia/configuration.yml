@@ -82,3 +82,15 @@ identity_providers:
           - email
           - groups
         token_endpoint_auth_method: client_secret_basic
+      - client_id: argocd
+        client_name: ArgoCD
+        client_secret: '{{ env "AUTH_ARGOCD_OIDC_CLIENT_SECRET" }}'
+        consent_mode: implicit
+        redirect_uris:
+          - https://argocd.platform.the-lab.zone/api/dex/callback
+        scopes:
+          - openid
+          - profile
+          - email
+          - groups
+        token_endpoint_auth_method: client_secret_post
