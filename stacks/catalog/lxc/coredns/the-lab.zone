@@ -22,6 +22,7 @@ forgejo.infra   IN A     10.40.1.22
 zot.infra       IN A     10.40.1.31
 postgresql.infra IN A     10.40.1.41
 valkey.infra    IN A     10.40.1.42
+grafana.infra   IN A     10.40.1.50
 
 git.forgejo    IN CNAME forgejo.infra.the-lab.zone.
 

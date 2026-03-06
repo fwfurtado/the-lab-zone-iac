@@ -95,8 +95,8 @@ registry.infra.the-lab.zone {
 	reverse_proxy http://10.40.1.30:5000
 }
 
-grafana.infra.the-lab.zone {
-	reverse_proxy http://10.40.1.50
+grafana.the-lab.zone {
+	reverse_proxy http://10.40.1.50:3000
 }
 
 haos.the-lab.zone {
