@@ -21,6 +21,8 @@ components:
             bucket_names: ["forgejo", "forgejo-lfs"]
           assets:
             bucket_names: ["assets"]
+          velero:
+            bucket_names: ["velero-backups"]
         buckets:
           forgejo:
             website: false
@@ -28,6 +30,8 @@ components:
             website: false
           assets:
             website: true
+          velero-backups:
+            website: false
 
     lxc:
       metadata:
