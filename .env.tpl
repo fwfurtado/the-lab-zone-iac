@@ -15,7 +15,4 @@ export TS_AUTH_KEY={{ op://homelab/Tailscale Infra Key/credential }}
 
 export CLOUDFLARE_API_KEY={{ op://development/Cloudflare/the-lab.zone }}
 
-export ZOT_IMAGE_REGISTRY_USERNAME={{ op://homelab/Zot K8s/username}}
-export ZOT_IMAGE_REGISTRY_PASSWORD={{ op://homelab/Zot K8s/password}}
-
 export SSH_PUBLIC_KEY="{{ op://homelab/SSH Key Proxmox fwfurtado/public key }}"

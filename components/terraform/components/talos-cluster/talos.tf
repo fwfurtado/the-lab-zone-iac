@@ -36,7 +36,6 @@ resource "talos_machine_configuration_apply" "nodes" {
   config_patches = compact(concat(
     var.talos_config_patches,
     [local.install_disk_patch],
-    [local.registry_config_patch],
     try([local.network_patches[each.key]], []),
     each.value.role == "controlplane" ? var.controlplane_config_patches : var.worker_config_patches
   ))
