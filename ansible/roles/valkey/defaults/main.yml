@@ -1,3 +1,0 @@
----
-valkey_data_dir: "/var/lib/valkey/data"
-valkey_conf: "/etc/valkey/valkey.conf"

@@ -1,6 +1,0 @@
----
-- name: restart step-renewer
-  ansible.builtin.systemd:
-    name: step-renewer
-    state: restarted
-    daemon_reload: true
