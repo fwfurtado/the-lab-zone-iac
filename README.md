@@ -70,6 +70,30 @@ kubectl get nodes
 
 Your machine must be able to reach the control plane (e.g. `10.40.0.20:6443`). Use the same LAN, Tailscale, or VPN as for the apply.
 
+## Proxmox Terraform user setup
+
+If the Proxmox host was reinstalled or the user was lost, recreate the API user that Terraform uses:
+
+```bash
+# SSH into the Proxmox host
+ssh root@<proxmox-host>
+
+# Create the user
+pveum user add terraform-user@pve
+
+# Grant Administrator role
+pveum acl modify / --users terraform-user@pve --roles Administrator
+
+# Create API token (no privilege separation, inherits user permissions)
+pveum user token add terraform-user@pve tf-token --privsep 0
+```
+
+Update the generated token in 1Password (`Proxmox Terraform Token`):
+- **username**: `terraform-user@pve!tf-token`
+- **password**: the secret printed by the last command
+
+Then reload your `.env` and retry.
+
 ## Notes
 
 - **Proxmox VM tags**: only letters, numbers, hyphens, and underscores (e.g. `cluster-platform`, not `cluster:platform`).

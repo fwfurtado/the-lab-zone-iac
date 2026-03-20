@@ -27,33 +27,45 @@ components:
             - "vm"
         nodes:
           - name: "cp-1"
-            id: 200
+            id: 100
             role: "controlplane"
             cpu: 4
             memory: 16384
             disk_size: 100
             ip_cidr: "10.40.1.70/21"
+            node_labels:
+              topology.kubernetes.io/region: "homelab"
+              topology.kubernetes.io/zone: "pve"
           - name: "worker-1"
-            id: 201
+            id: 101
             role: "worker"
             cpu: 6
             memory: 16384
             disk_size: 100
             ip_cidr: "10.40.1.71/21"
+            node_labels:
+              topology.kubernetes.io/region: "homelab"
+              topology.kubernetes.io/zone: "pve"
           - name: "worker-2"
-            id: 202
+            id: 102
             role: "worker"
             cpu: 6
             memory: 16384
             disk_size: 100
             ip_cidr: "10.40.1.72/21"
+            node_labels:
+              topology.kubernetes.io/region: "homelab"
+              topology.kubernetes.io/zone: "pve"
           - name: "worker-3"
-            id: 203
+            id: 103
             role: "worker"
             cpu: 6
             memory: 16384
             disk_size: 100
             ip_cidr: "10.40.1.73/21"
+            node_labels:
+              topology.kubernetes.io/region: "homelab"
+              topology.kubernetes.io/zone: "pve"
         controlplane_config_patches:
           - |
             cluster:

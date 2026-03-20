@@ -37,6 +37,8 @@ resource "talos_machine_configuration_apply" "nodes" {
     var.talos_config_patches,
     [local.install_disk_patch],
     try([local.network_patches[each.key]], []),
+    try([local.node_labels_patches[each.key]], []),
+    try([local.node_taints_patches[each.key]], []),
     each.value.role == "controlplane" ? var.controlplane_config_patches : var.worker_config_patches
   ))
 

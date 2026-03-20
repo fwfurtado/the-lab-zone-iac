@@ -13,6 +13,4 @@ export TF_TOKEN_app_terraform_io={{ op://development/Terraform/api token/homelab
 
 export TS_AUTH_KEY={{ op://homelab/Tailscale Infra Key/credential }}
 
-export CLOUDFLARE_API_KEY={{ op://development/Cloudflare/the-lab.zone }}
-
 export SSH_PUBLIC_KEY="{{ op://homelab/SSH Key Proxmox fwfurtado/public key }}"

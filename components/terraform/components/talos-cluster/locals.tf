@@ -30,7 +30,9 @@ locals {
         [node.role],
         try(node.tags, [])
       )))
-      ip = split("/", node.ip_cidr)[0]
+      node_labels = try(node.node_labels, {})
+      node_taints = try(node.node_taints, {})
+      ip          = split("/", node.ip_cidr)[0]
     }
   ]
 
@@ -79,6 +81,22 @@ locals {
       }
     }
   })
+
+  node_labels_patches = {
+    for node in local.vms : node.name => yamlencode({
+      machine = {
+        nodeLabels = node.node_labels
+      }
+    }) if length(node.node_labels) > 0
+  }
+
+  node_taints_patches = {
+    for node in local.vms : node.name => yamlencode({
+      machine = {
+        nodeTaints = node.node_taints
+      }
+    }) if length(node.node_taints) > 0
+  }
 
   requested_extensions = distinct(var.talos_image_extensions)
   resolved_extensions  = length(local.requested_extensions) == 0 ? [] : try(distinct(data.talos_image_factory_extensions_versions.this.extensions_info[*].name), [])

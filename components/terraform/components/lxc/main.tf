@@ -86,6 +86,8 @@ resource "proxmox_virtual_environment_container" "this" {
       console,
       network_interface[0].mac_address,
       operating_system,
+      initialization, # avoid replacement after restore from backup
+      disk,           # avoid replacement if datastore name differs
     ]
   }
 }

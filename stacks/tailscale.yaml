@@ -18,7 +18,7 @@ components:
         ssh_public_keys:
           - !env SSH_PUBLIC_KEY
         container:
-          id: 100
+          id: 104
           hostname: "tailscale"
           description: "Tailscale"
           network:

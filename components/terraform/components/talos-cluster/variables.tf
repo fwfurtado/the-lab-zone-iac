@@ -24,6 +24,8 @@ variable "nodes" {
     started         = optional(bool)
     on_boot         = optional(bool)
     tags            = optional(list(string), [])
+    node_labels     = optional(map(string), {})
+    node_taints     = optional(map(string), {})
   }))
   description = <<-EOD
     Talos nodes. ip_cidr is the address used to connect (and the expected address after config).

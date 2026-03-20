@@ -23,7 +23,7 @@ vars:
       gateway: "10.40.0.1"
       dns_servers: []
     disk:
-      storage_id: "ssd-standard"
+      storage_id: "local-ssd"
     features:
       nesting: true
       unprivileged: true
