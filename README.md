@@ -34,19 +34,20 @@ Application workloads are deployed via GitOps in a separate repo ([the-lab-zone-
 
 | Stack | Component | Type | Description |
 |-------|-----------|------|-------------|
-| `platform` | `talos-cluster` | VM | Talos Kubernetes cluster (1 CP + 3 workers) |
+| `platform` | `talos-cluster` | VM | Talos Kubernetes cluster (1 CP + 4 workers) |
 | `tailscale` | `lxc` | LXC | Tailscale subnet router |
 
 ## Platform cluster
 
-The `platform` stack provisions a 4-node Talos cluster as Proxmox VMs.
+The `platform` stack provisions a 5-node Talos cluster as Proxmox VMs.
 
-| Node | VM ID | Role | CPU | RAM | IP |
-|------|-------|------|-----|-----|----|
-| cp-1 | 100 | controlplane | 4 | 16 GB | 10.40.1.70 |
-| worker-1 | 101 | worker | 6 | 16 GB | 10.40.1.71 |
-| worker-2 | 102 | worker | 6 | 16 GB | 10.40.1.72 |
-| worker-3 | 103 | worker | 6 | 16 GB | 10.40.1.73 |
+| Node | VM ID | Role | CPU | RAM | IP | Taint |
+|------|-------|------|-----|-----|----|-------|
+| cp-1 | 100 | controlplane | 4 | 16 GB | 10.40.1.70 | -- |
+| worker-1 | 101 | worker | 6 | 16 GB | 10.40.1.71 | -- |
+| worker-2 | 102 | worker | 6 | 16 GB | 10.40.1.72 | -- |
+| worker-3 | 103 | worker | 6 | 16 GB | 10.40.1.73 | -- |
+| runner-1 | 105 | worker | 4 | 8 GB | 10.40.1.74 | `workload/forgejo-actions=true:NoSchedule` |
 
 **Talos version**: v1.7.5
 **Extensions**: iscsi-tools, qemu-guest-agent
@@ -63,16 +64,20 @@ The `talos-cluster` component installs three Helm charts as part of the initial 
 
 ### Node labels and taints
 
-Nodes support optional `node_labels` and `node_taints` maps in `stacks/platform.yaml`:
+All nodes have topology labels (`topology.kubernetes.io/region: homelab`, `topology.kubernetes.io/zone: pve`) required by the Proxmox CSI driver.
+
+Nodes support optional `node_labels` and `node_taints` maps in `stacks/platform.yaml`. Taints use the format `value:Effect` and are applied via kubelet `register-with-taints` (only takes effect on first node registration):
 
 ```yaml
 nodes:
-  - name: "worker-1"
+  - name: "runner-1"
     node_labels:
-      topology.kubernetes.io/zone: "pve"
+      workload/forgejo-actions: "true"
     node_taints:
-      dedicated: "gpu:NoSchedule"
+      workload/forgejo-actions: "true:NoSchedule"
 ```
+
+The `runner-1` node is dedicated to Forgejo Actions runners. Workloads targeting it need a matching toleration and `nodeSelector`.
 
 ### Apply from a host that can reach the nodes
 
