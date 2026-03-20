@@ -1,28 +1,29 @@
-# The Lab Zone
+# The Lab Zone IaC
 
-Infrastructure-as-code for the homelab: Proxmox VMs (Talos Kubernetes), LXC containers (Traefik, Tailscale), managed with Atmos and OpenTofu/Terraform.
+Infrastructure-as-code for the homelab: a Talos Kubernetes cluster and a Tailscale subnet router running on Proxmox, managed with [Atmos](https://atmos.tools) and Terraform.
+
+Application workloads are deployed via GitOps in a separate repo ([the-lab-zone-gitops](https://github.com/fwfurtado/the-lab-zone-gitops)).
 
 ## Structure
 
 | Path | Description |
 |------|-------------|
 | `atmos.yaml` | Atmos configuration |
-| `components/terraform/modules/` | Reusable modules (e.g. `vm`, `lxc`) |
-| `components/terraform/components/` | Atmos Terraform components (`talos-cluster`, `traefik`, `tailscale`) |
-| `stacks/` | Stack definitions (vars per environment) |
-| `stacks/catalog/` | Shared defaults for stacks |
+| `components/terraform/modules/` | Reusable Terraform modules (`vm`, `lxc`) |
+| `components/terraform/components/` | Atmos Terraform components (`talos-cluster`, `lxc`) |
+| `stacks/` | Stack definitions (one per environment) |
+| `stacks/catalog/` | Shared defaults (`_vm.yaml`, `_terraform-lxc.yaml`) |
 | `workflows/` | Atmos workflows |
+| `ansible/` | Ansible roles and playbooks for LXC configuration |
 
 ## Getting started
 
-1. **Dependencies**
-   Install tools from `.tool-versions` (e.g. via asdf).
+1. **Dependencies** -- install tools from `.tool-versions` (e.g. via asdf):
+   - `atmos 1.205.0`
 
-2. **Environment**
-   Copy `.env.tpl` to `.env`, fill in Proxmox (and any other) credentials. Load with `direnv` (`.envrc`) or source manually.
+2. **Secrets** -- this project uses [1Password CLI](https://developer.1password.com/docs/cli/) to inject secrets. The `.envrc` runs `op inject` on `.env.tpl` automatically via direnv.
 
 3. **Plan / apply**
-   Use Atmos to target a stack and component:
 
    ```bash
    atmos terraform plan talos-cluster -s platform
@@ -31,60 +32,96 @@ Infrastructure-as-code for the homelab: Proxmox VMs (Talos Kubernetes), LXC cont
 
 ## Stacks
 
-| Stack | Component | Description |
-|-------|-----------|-------------|
-| `platform` | `talos-cluster` | Talos OS Kubernetes cluster (control plane + worker) on Proxmox VMs |
-| `tailscale` | (LXC) | Tailscale subnet router (LXC) |
-| `traefik` | (LXC) | Traefik edge proxy (LXC) |
+| Stack | Component | Type | Description |
+|-------|-----------|------|-------------|
+| `platform` | `talos-cluster` | VM | Talos Kubernetes cluster (1 CP + 3 workers) |
+| `tailscale` | `lxc` | LXC | Tailscale subnet router |
 
-Workflows for LXC stacks: see `workflows/lxc.yaml`.
+## Platform cluster
 
-## Talos platform cluster
+The `platform` stack provisions a 4-node Talos cluster as Proxmox VMs.
 
-The `platform` stack provisions a 2-node Talos cluster (control plane + worker) as VMs on Proxmox.
+| Node | VM ID | Role | CPU | RAM | IP |
+|------|-------|------|-----|-----|----|
+| cp-1 | 100 | controlplane | 4 | 16 GB | 10.40.1.70 |
+| worker-1 | 101 | worker | 6 | 16 GB | 10.40.1.71 |
+| worker-2 | 102 | worker | 6 | 16 GB | 10.40.1.72 |
+| worker-3 | 103 | worker | 6 | 16 GB | 10.40.1.73 |
+
+**Talos version**: v1.7.5
+**Extensions**: iscsi-tools, qemu-guest-agent
+**CNI**: Cilium 1.19.0 (kube-proxy replacement)
+**GitOps**: ArgoCD 9.4.0 (bootstrapped by Terraform)
+
+### Bootstrapped Helm releases
+
+The `talos-cluster` component installs three Helm charts as part of the initial provisioning:
+
+1. **prometheus-operator-crds** -- CRDs needed by monitoring stack
+2. **Cilium** -- CNI with kube-proxy replacement
+3. **ArgoCD** -- GitOps controller that manages all other workloads
+
+### Node labels and taints
+
+Nodes support optional `node_labels` and `node_taints` maps in `stacks/platform.yaml`:
+
+```yaml
+nodes:
+  - name: "worker-1"
+    node_labels:
+      topology.kubernetes.io/zone: "pve"
+    node_taints:
+      dedicated: "gpu:NoSchedule"
+```
 
 ### Apply from a host that can reach the nodes
 
-The Talos provider connects to each node at `<node_ip>:50000`. **Run `atmos terraform apply` from a host that has network route to the node IPs** (e.g. same LAN as Proxmox, or via Tailscale/VPN). Otherwise you get `no route to host`.
-
-```bash
-atmos terraform apply talos-cluster -s platform -auto-approve
-```
+The Talos provider connects to each node at `<node_ip>:50000`. Run apply from a host with network route to the node IPs (same LAN, Tailscale, or VPN).
 
 ### Node IPs and bootstrap
 
-- **`ip_cidr`** in the stack is the address Terraform uses to connect to each node.
-- If nodes get DHCP first and you want static IPs, use **`static_ip_cidr`** for the IP to configure in Talos; set **`ip_cidr`** to the current (e.g. DHCP) IP so Terraform can connect. After the first apply, switch the stack to the final IPs (see `stacks/platform.yaml` comments).
-- **`cluster_endpoint`** should be the control plane API URL (e.g. `https://10.40.0.20:6443`).
+- **`ip_cidr`** -- address Terraform uses to connect to each node.
+- **`static_ip_cidr`** -- use when nodes have a temporary DHCP IP; set `ip_cidr` to the current IP and `static_ip_cidr` to the desired static IP.
+- **`cluster_endpoint`** -- control plane API URL (`https://10.40.1.70:6443`).
 
-### Connecting to the cluster (kubeconfig)
-
-After a successful apply, the component outputs the cluster kubeconfig. Save it and use it with `kubectl`:
+### Kubeconfig and talosconfig
 
 ```bash
-atmos terraform output talos-cluster -s platform talos_cluster -o json | jq -r '.kubeconfig_raw' > kubeconfig-platform
+make kubeconfig   # saves to ~/.kube/config and 1Password
+make talosconfig  # saves to ~/.talos/config and 1Password
+```
+
+Or manually:
+
+```bash
+atmos terraform output talos-cluster -s platform talos_cluster -o json \
+  | jq -r '.kubeconfig_raw' > kubeconfig-platform
 chmod 600 kubeconfig-platform
 export KUBECONFIG=$(pwd)/kubeconfig-platform
 kubectl get nodes
 ```
 
-Your machine must be able to reach the control plane (e.g. `10.40.0.20:6443`). Use the same LAN, Tailscale, or VPN as for the apply.
+## Tailscale subnet router
+
+The `tailscale` stack provisions an LXC container (ID 104, IP 10.40.0.10) running Tailscale as a subnet router advertising `10.40.0.0/21`.
+
+### Workflows
+
+```bash
+atmos workflow tailscale/apply      # create/update the LXC container
+atmos workflow tailscale/configure  # run Ansible to configure Tailscale
+atmos workflow tailscale/drift      # check for configuration drift
+```
 
 ## Proxmox Terraform user setup
 
-If the Proxmox host was reinstalled or the user was lost, recreate the API user that Terraform uses:
+If the Proxmox host was reinstalled or the user was lost, recreate the API user:
 
 ```bash
-# SSH into the Proxmox host
 ssh root@<proxmox-host>
 
-# Create the user
 pveum user add terraform-user@pve
-
-# Grant Administrator role
 pveum acl modify / --users terraform-user@pve --roles Administrator
-
-# Create API token (no privilege separation, inherits user permissions)
 pveum user token add terraform-user@pve tf-token --privsep 0
 ```
 
@@ -92,11 +129,22 @@ Update the generated token in 1Password (`Proxmox Terraform Token`):
 - **username**: `terraform-user@pve!tf-token`
 - **password**: the secret printed by the last command
 
-Then reload your `.env` and retry.
+### Importing existing VMs after restore
+
+If VMs were restored from backup (e.g. PBS) and Terraform state is out of sync:
+
+```bash
+# Remove stale state entries
+atmos terraform state talos-cluster rm -s platform 'module.vm.proxmox_virtual_environment_vm.nodes["cp-1"]'
+
+# Import with format: <proxmox-node>/<vm-id>
+atmos terraform import talos-cluster -s platform 'module.vm.proxmox_virtual_environment_vm.nodes["cp-1"]' pve/100
+```
 
 ## Notes
 
-- **Proxmox VM tags**: only letters, numbers, hyphens, and underscores (e.g. `cluster-platform`, not `cluster:platform`).
-- **Talos on Proxmox**: VMs need CPU type at least x86-64-v2 (e.g. `x86-64-v2-AES`). The component sets this by default; the generic `vm` module defaults to `qemu64`.
-- **Catalog**: `stacks/catalog/_vm.yaml` and `stacks/catalog/_lxc.yaml` (and nested configs) provide defaults for stacks.
-- For architecture and GitOps context, see [CLAUDE.md](CLAUDE.md).
+- **Storage**: VMs use `local-ssd` (LVM-thin). LXC containers use `local-ssd` for disks.
+- **Proxmox VM tags**: only letters, numbers, hyphens, and underscores.
+- **Talos CPU requirement**: x86-64-v2 or higher (the component defaults to `x86-64-v2-AES`).
+- **Terraform backend**: Terraform Cloud, organization `the-lab-zone`.
+- **Network**: `10.40.0.0/21` subnet. Gateway `10.40.0.1`.
