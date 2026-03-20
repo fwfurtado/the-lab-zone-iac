@@ -35,7 +35,8 @@ resource "proxmox_virtual_environment_vm" "nodes" {
   dynamic "initialization" {
     for_each = each.value.network.ip_cidr != null ? [1] : []
     content {
-      interface = "ide0"
+      datastore_id = each.value.disk.datastore_id
+      interface    = "ide0"
       ip_config {
         ipv4 {
           address = each.value.network.ip_cidr

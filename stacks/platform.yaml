@@ -66,6 +66,19 @@ components:
             node_labels:
               topology.kubernetes.io/region: "homelab"
               topology.kubernetes.io/zone: "pve"
+          - name: "runner-1"
+            id: 105
+            role: "worker"
+            cpu: 4
+            memory: 8192
+            disk_size: 100
+            ip_cidr: "10.40.1.74/21"
+            node_labels:
+              topology.kubernetes.io/region: "homelab"
+              topology.kubernetes.io/zone: "pve"
+              workload/forgejo-actions: "true"
+            node_taints:
+              workload/forgejo-actions: "true:NoSchedule"
         controlplane_config_patches:
           - |
             cluster:
