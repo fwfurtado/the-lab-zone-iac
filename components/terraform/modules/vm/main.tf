@@ -66,7 +66,8 @@ resource "proxmox_virtual_environment_vm" "nodes" {
   lifecycle {
     ignore_changes = [
       network_device[0].mac_address,
-      cdrom, # avoid 403 VM.Config.CDROM on update; CDROM only needed for initial boot
+      cdrom,      # avoid 403 VM.Config.CDROM on update; CDROM only needed for initial boot
+      boot_order, # existing VMs may have different boot order after install
       disk, # ignore CSI-provisioned PVC disks managed by Kubernetes
       initialization, # cloud-init datastore may differ after restore
     ]

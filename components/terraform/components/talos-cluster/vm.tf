@@ -13,5 +13,5 @@ module "vm" {
     file_id   = proxmox_virtual_environment_download_file.talos_iso.id
     interface = "ide2"
   }
-  boot_order = ["scsi0"]
+  boot_order = ["scsi0", "ide2"]
 }
