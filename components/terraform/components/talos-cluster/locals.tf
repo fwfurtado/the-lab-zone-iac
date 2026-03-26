@@ -93,12 +93,8 @@ locals {
   node_taints_patches = {
     for node in local.vms : node.name => yamlencode({
       machine = {
-        kubelet = {
-          extraArgs = {
-            register-with-taints = join(",", [
-              for key, value in node.node_taints : "${key}=${value}"
-            ])
-          }
+        nodeTaints = {
+          for key, value in node.node_taints : key => value
         }
       }
     }) if length(node.node_taints) > 0

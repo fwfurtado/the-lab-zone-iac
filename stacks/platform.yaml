@@ -10,7 +10,7 @@ components:
         terraform_workspace: "{{ .stack }}"
       vars:
         proxmox_node_name: !env PROXMOX_SSH_NODE_NAME
-        talos_version: "v1.7.5"
+        talos_version: "v1.12.6"
         talos_image_platform: "nocloud"
         talos_image_architecture: "amd64"
         talos_image_extensions:
@@ -27,7 +27,7 @@ components:
             - "vm"
         nodes:
           - name: "cp-1"
-            id: 100
+            id: 1170
             role: "controlplane"
             cpu: 4
             memory: 16384
@@ -37,7 +37,7 @@ components:
               topology.kubernetes.io/region: "homelab"
               topology.kubernetes.io/zone: "pve"
           - name: "worker-1"
-            id: 101
+            id: 1171
             role: "worker"
             cpu: 6
             memory: 16384
@@ -47,7 +47,7 @@ components:
               topology.kubernetes.io/region: "homelab"
               topology.kubernetes.io/zone: "pve"
           - name: "worker-2"
-            id: 102
+            id: 1172
             role: "worker"
             cpu: 6
             memory: 16384
@@ -57,7 +57,7 @@ components:
               topology.kubernetes.io/region: "homelab"
               topology.kubernetes.io/zone: "pve"
           - name: "worker-3"
-            id: 103
+            id: 1173
             role: "worker"
             cpu: 6
             memory: 16384
@@ -67,7 +67,7 @@ components:
               topology.kubernetes.io/region: "homelab"
               topology.kubernetes.io/zone: "pve"
           - name: "runner-1"
-            id: 105
+            id: 1174
             role: "worker"
             cpu: 4
             memory: 8192

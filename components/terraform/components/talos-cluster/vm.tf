@@ -8,6 +8,7 @@ module "vm" {
 
   operating_system_type = var.operating_system_type
   cpu_type              = var.vm_cpu_type
+  agent_enabled         = true
   cdrom = {
     enabled   = true
     file_id   = proxmox_virtual_environment_download_file.talos_iso.id
