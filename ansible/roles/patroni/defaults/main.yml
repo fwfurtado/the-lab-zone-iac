@@ -1,0 +1,24 @@
+---
+pg_version: 16
+pg_port: 5433
+pg_data_dir: /var/lib/postgresql/data
+pg_data_disk: /dev/sdb
+pg_data_mount: /var/lib/postgresql
+
+pgbouncer_listen_port: 5432
+pgbouncer_pool_mode: transaction
+pgbouncer_max_client_conn: 200
+pgbouncer_default_pool_size: 20
+
+patroni_scope: pg-cluster
+patroni_name: pg-primary
+patroni_rest_port: 8008
+patroni_raft_port: 2380
+
+pgbackrest_stanza: main
+pgbackrest_s3_endpoint: s3.aistor.infra.the-lab.zone
+pgbackrest_s3_bucket: pgbackrest
+pgbackrest_s3_region: us-east-1
+pgbackrest_repo_path: /pgbackrest
+pgbackrest_retention_full: 7
+pgbackrest_retention_diff: 14

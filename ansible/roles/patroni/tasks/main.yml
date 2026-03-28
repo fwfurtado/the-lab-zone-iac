@@ -1,0 +1,38 @@
+---
+- name: Install qemu-guest-agent
+  ansible.builtin.apt:
+    name: qemu-guest-agent
+    state: present
+    update_cache: true
+  register: qga_install
+
+- name: Reboot if qemu-guest-agent was just installed
+  ansible.builtin.reboot:
+    reboot_timeout: 120
+  when: qga_install.changed
+
+- name: Enable qemu-guest-agent
+  ansible.builtin.systemd:
+    name: qemu-guest-agent
+    enabled: true
+    state: started
+
+- name: Configure data disk
+  ansible.builtin.include_tasks: disk.yml
+
+- name: Install PostgreSQL
+  ansible.builtin.include_tasks: postgresql.yml
+
+- name: Install and configure Patroni
+  ansible.builtin.include_tasks: patroni.yml
+
+- name: Install and configure PgBouncer
+  ansible.builtin.include_tasks: pgbouncer.yml
+
+- name: Install and configure PgBackRest
+  ansible.builtin.include_tasks: pgbackrest.yml
+  when: pgbackrest_enabled | default(false)
+
+- name: Configure backup schedule
+  ansible.builtin.include_tasks: backup_schedule.yml
+  when: pgbackrest_enabled | default(false)

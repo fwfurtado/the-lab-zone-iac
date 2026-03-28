@@ -1,0 +1,117 @@
+---
+# Full backup - Sunday 01:00
+- name: Deploy full backup service
+  ansible.builtin.copy:
+    dest: /etc/systemd/system/pgbackrest-full.service
+    mode: "0644"
+    content: |
+      [Unit]
+      Description=PgBackRest Full Backup
+
+      [Service]
+      Type=oneshot
+      User=postgres
+      ExecStart=/usr/bin/pgbackrest --stanza={{ pgbackrest_stanza }} --type=full backup
+      IOSchedulingClass=idle
+      Nice=19
+
+- name: Deploy full backup timer
+  ansible.builtin.copy:
+    dest: /etc/systemd/system/pgbackrest-full.timer
+    mode: "0644"
+    content: |
+      [Unit]
+      Description=PgBackRest Full Backup Schedule
+
+      [Timer]
+      OnCalendar=Sun *-*-* 01:00:00
+      Persistent=true
+      RandomizedDelaySec=300
+
+      [Install]
+      WantedBy=timers.target
+
+- name: Enable full backup timer
+  ansible.builtin.systemd:
+    name: pgbackrest-full.timer
+    daemon_reload: true
+    enabled: true
+    state: started
+
+# Differential backup - Wednesday 01:00
+- name: Deploy differential backup service
+  ansible.builtin.copy:
+    dest: /etc/systemd/system/pgbackrest-diff.service
+    mode: "0644"
+    content: |
+      [Unit]
+      Description=PgBackRest Differential Backup
+
+      [Service]
+      Type=oneshot
+      User=postgres
+      ExecStart=/usr/bin/pgbackrest --stanza={{ pgbackrest_stanza }} --type=diff backup
+      IOSchedulingClass=idle
+      Nice=19
+
+- name: Deploy differential backup timer
+  ansible.builtin.copy:
+    dest: /etc/systemd/system/pgbackrest-diff.timer
+    mode: "0644"
+    content: |
+      [Unit]
+      Description=PgBackRest Differential Backup Schedule
+
+      [Timer]
+      OnCalendar=Wed *-*-* 01:00:00
+      Persistent=true
+      RandomizedDelaySec=300
+
+      [Install]
+      WantedBy=timers.target
+
+- name: Enable differential backup timer
+  ansible.builtin.systemd:
+    name: pgbackrest-diff.timer
+    daemon_reload: true
+    enabled: true
+    state: started
+
+# Incremental backup - Mon, Tue, Thu, Fri, Sat 01:00
+- name: Deploy incremental backup service
+  ansible.builtin.copy:
+    dest: /etc/systemd/system/pgbackrest-incr.service
+    mode: "0644"
+    content: |
+      [Unit]
+      Description=PgBackRest Incremental Backup
+
+      [Service]
+      Type=oneshot
+      User=postgres
+      ExecStart=/usr/bin/pgbackrest --stanza={{ pgbackrest_stanza }} --type=incr backup
+      IOSchedulingClass=idle
+      Nice=19
+
+- name: Deploy incremental backup timer
+  ansible.builtin.copy:
+    dest: /etc/systemd/system/pgbackrest-incr.timer
+    mode: "0644"
+    content: |
+      [Unit]
+      Description=PgBackRest Incremental Backup Schedule
+
+      [Timer]
+      OnCalendar=Mon,Tue,Thu,Fri,Sat *-*-* 01:00:00
+      Persistent=true
+      RandomizedDelaySec=300
+
+      [Install]
+      WantedBy=timers.target
+
+- name: Enable incremental backup timer
+  ansible.builtin.systemd:
+    name: pgbackrest-incr.timer
+    daemon_reload: true
+    enabled: true
+    state: started

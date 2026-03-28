@@ -1,0 +1,19 @@
+---
+- name: Create filesystem on data disk
+  community.general.filesystem:
+    fstype: ext4
+    dev: "{{ pg_data_disk }}"
+
+- name: Create mount point
+  ansible.builtin.file:
+    path: "{{ pg_data_mount }}"
+    state: directory
+    mode: "0755"
+
+- name: Mount data disk
+  ansible.posix.mount:
+    path: "{{ pg_data_mount }}"
+    src: "{{ pg_data_disk }}"
+    fstype: ext4
+    opts: defaults,noatime
+    state: mounted

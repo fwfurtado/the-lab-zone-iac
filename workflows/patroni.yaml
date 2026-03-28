@@ -1,0 +1,34 @@
+workflows:
+  patroni/apply:
+    description: "Create/update the Patroni PostgreSQL VM infrastructure"
+    steps:
+      - command: terraform apply patroni-vm -s patroni -auto-approve
+
+  patroni/configure:
+    description: "Configure Patroni, PgBouncer, and PgBackRest on the VM via Ansible"
+    steps:
+      - type: shell
+        command: >-
+          cd ansible && ansible-playbook playbooks/configure.yml
+          --limit patroni-pg
+          -e patroni_superuser_password=${PATRONI_SUPERUSER_PASSWORD}
+          -e patroni_replication_password=${PATRONI_REPLICATION_PASSWORD}
+          -e pgbackrest_s3_key=${PGBACKREST_S3_KEY}
+          -e pgbackrest_s3_secret=${PGBACKREST_S3_SECRET}
+          -e pgbackrest_repo_cipher_pass=${PGBACKREST_REPO_CIPHER_PASS}
+          -e pgbackrest_enabled=true
+
+  patroni/drift:
+    description: "Check configuration drift on the Patroni PostgreSQL VM"
+    steps:
+      - type: shell
+        command: >-
+          cd ansible && ansible-playbook playbooks/configure.yml
+          --limit patroni-pg
+          --check --diff
+          -e patroni_superuser_password=${PATRONI_SUPERUSER_PASSWORD}
+          -e patroni_replication_password=${PATRONI_REPLICATION_PASSWORD}
+          -e pgbackrest_s3_key=${PGBACKREST_S3_KEY}
+          -e pgbackrest_s3_secret=${PGBACKREST_S3_SECRET}
+          -e pgbackrest_repo_cipher_pass=${PGBACKREST_REPO_CIPHER_PASS}
+          -e pgbackrest_enabled=true

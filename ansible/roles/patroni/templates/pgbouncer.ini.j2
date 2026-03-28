@@ -1,0 +1,18 @@
+[databases]
+* = host=127.0.0.1 port={{ pg_port }}
+
+[pgbouncer]
+listen_addr = 0.0.0.0
+listen_port = {{ pgbouncer_listen_port }}
+auth_type = scram-sha-256
+auth_file = /etc/pgbouncer/userlist.txt
+pool_mode = {{ pgbouncer_pool_mode }}
+max_client_conn = {{ pgbouncer_max_client_conn }}
+default_pool_size = {{ pgbouncer_default_pool_size }}
+min_pool_size = 5
+reserve_pool_size = 5
+reserve_pool_timeout = 3
+server_reset_query = DISCARD ALL
+log_connections = 0
+log_disconnections = 0
+application_name_add_host = 1

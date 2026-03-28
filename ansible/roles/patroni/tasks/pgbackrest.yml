@@ -1,0 +1,38 @@
+---
+- name: Install PgBackRest
+  ansible.builtin.apt:
+    name: pgbackrest
+    state: present
+
+- name: Create PgBackRest config directory
+  ansible.builtin.file:
+    path: /etc/pgbackrest
+    state: directory
+    owner: postgres
+    group: postgres
+    mode: "0750"
+
+- name: Create PgBackRest log directory
+  ansible.builtin.file:
+    path: /var/log/pgbackrest
+    state: directory
+    owner: postgres
+    group: postgres
+    mode: "0750"
+
+- name: Deploy PgBackRest configuration
+  ansible.builtin.template:
+    src: pgbackrest.conf.j2
+    dest: /etc/pgbackrest/pgbackrest.conf
+    owner: postgres
+    group: postgres
+    mode: "0640"
+
+- name: Create PgBackRest stanza
+  ansible.builtin.command:
+    cmd: pgbackrest --stanza={{ pgbackrest_stanza }} stanza-create
+  become: true
+  become_user: postgres
+  register: stanza_result
+  changed_when: "'already exists' not in stanza_result.stderr"
+  failed_when: stanza_result.rc != 0 and 'already exists' not in stanza_result.stderr
