@@ -23,3 +23,7 @@ export PATRONI_REPLICATION_PASSWORD={{ op://homelab/Patroni PostgreSQL/replicati
 export PGBACKREST_S3_KEY={{ op://homelab/MinIO PgBackRest/access-key }}
 export PGBACKREST_S3_SECRET={{ op://homelab/MinIO PgBackRest/secret-key }}
 export PGBACKREST_REPO_CIPHER_PASS={{ op://homelab/PgBackRest Encryption/cipher-pass }}
+export PG_AUTHELIA_PASSWORD={{ op://homelab/Authelia Database/password }}
+export PG_CODER_PASSWORD={{ op://homelab/Coder Database/password }}
+export PG_FORGEJO_PASSWORD={{ op://homelab/Forgejo Database/password }}
+export PG_INFISICAL_PASSWORD={{ op://homelab/Infisical Database/password }}
