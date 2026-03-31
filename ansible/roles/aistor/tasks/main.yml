@@ -1,0 +1,101 @@
+---
+- name: Install Python 3
+  ansible.builtin.raw: apt-get update && apt-get install -y python3
+  changed_when: false
+
+- name: Gather facts after Python install
+  ansible.builtin.setup:
+
+- name: Install NFS client
+  ansible.builtin.apt:
+    name: nfs-common
+    state: present
+    update_cache: true
+
+- name: Install qemu-guest-agent
+  ansible.builtin.apt:
+    name: qemu-guest-agent
+    state: present
+  register: qga_install
+
+- name: Reboot if qemu-guest-agent was just installed
+  ansible.builtin.reboot:
+    reboot_timeout: 120
+  when: qga_install.changed
+
+- name: Enable qemu-guest-agent
+  ansible.builtin.systemd:
+    name: qemu-guest-agent
+    enabled: true
+    state: started
+
+- name: Create data directory
+  ansible.builtin.file:
+    path: "{{ aistor_data_dir }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Mount NFS data volume
+  ansible.posix.mount:
+    src: "{{ aistor_nfs_server }}:{{ aistor_nfs_export }}"
+    path: "{{ aistor_data_dir }}"
+    fstype: nfs
+    opts: defaults,_netdev,noatime
+    state: mounted
+
+- name: Set ownership on data directory
+  ansible.builtin.file:
+    path: "{{ aistor_data_dir }}"
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Download MinIO AIStor deb package
+  ansible.builtin.get_url:
+    url: "{{ aistor_deb_url }}"
+    dest: /tmp/minio.deb
+    mode: "0644"
+  register: minio_download
+
+- name: Install MinIO AIStor
+  ansible.builtin.apt:
+    deb: /tmp/minio.deb
+    state: present
+  when: minio_download.changed
+  notify: restart minio
+
+- name: Deploy MinIO environment file
+  ansible.builtin.template:
+    src: minio.env.j2
+    dest: /etc/default/minio
+    owner: root
+    group: root
+    mode: "0640"
+  notify: restart minio
+
+- name: Create systemd override directory
+  ansible.builtin.file:
+    path: /etc/systemd/system/minio.service.d
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Deploy systemd override for mount dependency
+  ansible.builtin.template:
+    src: minio-override.conf.j2
+    dest: /etc/systemd/system/minio.service.d/override.conf
+    owner: root
+    group: root
+    mode: "0644"
+  notify:
+    - reload systemd
+    - restart minio
+
+- name: Enable and start MinIO service
+  ansible.builtin.systemd:
+    name: minio
+    enabled: true
+    state: started

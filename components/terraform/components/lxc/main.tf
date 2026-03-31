@@ -108,10 +108,10 @@ resource "null_resource" "extra_pve_conf" {
     inline = concat(
       [
         for line in var.extra_pve_conf_lines :
-        "echo '${line}' | sudo tee -a /etc/pve/lxc/${local.container.id}.conf"
+        "echo '${line}' | tee -a /etc/pve/lxc/${local.container.id}.conf"
       ],
       var.extra_reboot_after_pve_changes ? [
-        "sudo pct reboot ${local.container.id} --timeout 60"
+        "pct reboot ${local.container.id} --timeout 60"
       ] : []
     )
   }

@@ -1,0 +1,28 @@
+workflows:
+  aistor/apply:
+    description: "Create/update the MinIO AIStor VM infrastructure"
+    steps:
+      - command: terraform apply aistor-vm -s aistor -auto-approve
+
+  aistor/configure:
+    description: "Configure MinIO AIStor on the running VM via Ansible"
+    steps:
+      - type: shell
+        command: >-
+          cd ansible && ansible-playbook playbooks/configure.yml
+          --limit aistor
+          -e aistor_root_user=${MINIO_ROOT_USER}
+          -e aistor_root_password=${MINIO_ROOT_PASSWORD}
+          -e aistor_license=${MINIO_LICENSE}
+
+  aistor/drift:
+    description: "Check configuration drift on the MinIO AIStor VM"
+    steps:
+      - type: shell
+        command: >-
+          cd ansible && ansible-playbook playbooks/configure.yml
+          --limit aistor
+          --check --diff
+          -e aistor_root_user=${MINIO_ROOT_USER}
+          -e aistor_root_password=${MINIO_ROOT_PASSWORD}
+          -e aistor_license=${MINIO_LICENSE}

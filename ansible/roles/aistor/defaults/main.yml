@@ -1,0 +1,10 @@
+---
+# NFS mount
+aistor_nfs_server: "10.40.1.4"
+aistor_nfs_export: "/mnt/tank/proxmox/aistor"
+aistor_data_dir: "/mnt/aistor"
+
+# MinIO AIStor
+aistor_s3_port: 9000
+aistor_console_port: 9002
+aistor_deb_url: "https://dl.min.io/aistor/minio/release/linux-amd64/minio_20260326212440.0.0_amd64.deb"

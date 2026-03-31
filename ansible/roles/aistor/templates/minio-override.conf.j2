@@ -1,0 +1,7 @@
+[Unit]
+After=remote-fs.target
+RequiresMountsFor={{ aistor_data_dir }}
+
+[Service]
+User=root
+Group=root
