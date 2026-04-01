@@ -1,0 +1,5 @@
+workflows:
+  pbs/apply:
+    description: "Create/update the Proxmox Backup Server VM infrastructure"
+    steps:
+      - command: terraform apply pbs-vm -s pbs -auto-approve
