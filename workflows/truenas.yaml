@@ -18,7 +18,6 @@ workflows:
           zfs create tank/media/tv &&
           zfs create tank/media/music &&
           zfs create tank/media/photos &&
-          zfs create -o compression=off tank/proxmox/pbs &&
           zfs create -o compression=off tank/proxmox/aistor'
 
   truenas/setup-shares:
@@ -27,8 +26,7 @@ workflows:
       - type: shell
         command: >-
           ssh root@10.40.1.4
-          'midclt call sharing.nfs.create '"'"'{"path": "/mnt/tank/proxmox/pbs", "networks": ["10.40.0.0/21"], "maproot_user": "root"}'"'"' &&
-          midclt call sharing.nfs.create '"'"'{"path": "/mnt/tank/proxmox/aistor", "networks": ["10.40.0.0/21"], "maproot_user": "root"}'"'"' &&
+          'midclt call sharing.nfs.create '"'"'{"path": "/mnt/tank/proxmox/aistor", "networks": ["10.40.0.0/21"], "maproot_user": "root"}'"'"' &&
           midclt call sharing.smb.create '"'"'{"path": "/mnt/tank/backup", "name": "backup"}'"'"' &&
           midclt call sharing.smb.create '"'"'{"path": "/mnt/tank/documents", "name": "documents"}'"'"' &&
           midclt call sharing.smb.create '"'"'{"path": "/mnt/tank/media", "name": "media"}'"'"''
