@@ -28,6 +28,7 @@ export PG_CODER_PASSWORD={{ op://homelab/Coder Database/password }}
 export PG_FORGEJO_PASSWORD={{ op://homelab/Forgejo Database/password }}
 export PG_INFISICAL_PASSWORD={{ op://homelab/Infisical Database/password }}
 export PG_LITELLM_PASSWORD={{ op://homelab/LiteLLM Database/password }}
+export PG_CONTEXT_FORGE_PASSWORD={{ op://homelab/Contex Forge AI Database/password }}
 
 # MinIO AIStor
 export MINIO_ROOT_USER={{ op://homelab/MinIO AIStor/username }}
