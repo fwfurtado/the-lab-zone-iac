@@ -27,6 +27,7 @@ export PG_AUTHELIA_PASSWORD={{ op://homelab/Authelia Database/password }}
 export PG_CODER_PASSWORD={{ op://homelab/Coder Database/password }}
 export PG_FORGEJO_PASSWORD={{ op://homelab/Forgejo Database/password }}
 export PG_INFISICAL_PASSWORD={{ op://homelab/Infisical Database/password }}
+export PG_LITELLM_PASSWORD={{ op://homelab/LiteLLM Database/password }}
 
 # MinIO AIStor
 export MINIO_ROOT_USER={{ op://homelab/MinIO AIStor/username }}

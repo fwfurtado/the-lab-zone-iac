@@ -31,8 +31,8 @@
 
 - name: Install and configure PgBackRest
   ansible.builtin.include_tasks: pgbackrest.yml
-  when: pgbackrest_enabled | default(false)
+  when: pgbackrest_enabled | default(false) | bool
 
 - name: Configure backup schedule
   ansible.builtin.include_tasks: backup_schedule.yml
-  when: pgbackrest_enabled | default(false)
+  when: pgbackrest_enabled | default(false) | bool
