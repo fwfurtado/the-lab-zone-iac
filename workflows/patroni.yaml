@@ -17,7 +17,7 @@ workflows:
           -e pgbackrest_s3_secret=${PGBACKREST_S3_SECRET}
           -e pgbackrest_repo_cipher_pass=${PGBACKREST_REPO_CIPHER_PASS}
           -e pgbackrest_enabled=true
-          -e '{"pgbouncer_extra_users":[{"name":"authelia","password":"'"${PG_AUTHELIA_PASSWORD}"'"},{"name":"coder","password":"'"${PG_CODER_PASSWORD}"'"},{"name":"forgejo","password":"'"${PG_FORGEJO_PASSWORD}"'"},{"name":"infisical","password":"'"${PG_INFISICAL_PASSWORD}"'"},{"name":"litellm","password":"'"${PG_LITELLM_PASSWORD}"'"},{"name":"context_forge","password":"'"${PG_CONTEXT_FORGE_PASSWORD}"'"}]}'
+          -e '{"pgbouncer_extra_users":[{"name":"authelia","password":"'"${PG_AUTHELIA_PASSWORD}"'"},{"name":"coder","password":"'"${PG_CODER_PASSWORD}"'"},{"name":"forgejo","password":"'"${PG_FORGEJO_PASSWORD}"'"},{"name":"infisical","password":"'"${PG_INFISICAL_PASSWORD}"'"},{"name":"litellm","password":"'"${PG_LITELLM_PASSWORD}"'"},{"name":"context_forge","password":"'"${PG_CONTEXT_FORGE_PASSWORD}"'"},{"name":"obot","password":"'"${PG_OBOT_PASSWORD}"'"}]}'
 
   patroni/drift:
     description: "Check configuration drift on the Patroni PostgreSQL VM"
@@ -33,4 +33,4 @@ workflows:
           -e pgbackrest_s3_secret=${PGBACKREST_S3_SECRET}
           -e pgbackrest_repo_cipher_pass=${PGBACKREST_REPO_CIPHER_PASS}
           -e pgbackrest_enabled=true
-          -e '{"pgbouncer_extra_users":[{"name":"authelia","password":"'"${PG_AUTHELIA_PASSWORD}"'"},{"name":"coder","password":"'"${PG_CODER_PASSWORD}"'"},{"name":"forgejo","password":"'"${PG_FORGEJO_PASSWORD}"'"},{"name":"infisical","password":"'"${PG_INFISICAL_PASSWORD}"'"},{"name":"litellm","password":"'"${PG_LITELLM_PASSWORD}"'"},{"name":"context_forge","password":"'"${PG_CONTEXT_FORGE_PASSWORD}"'"}]}'
+          -e '{"pgbouncer_extra_users":[{"name":"authelia","password":"'"${PG_AUTHELIA_PASSWORD}"'"},{"name":"coder","password":"'"${PG_CODER_PASSWORD}"'"},{"name":"forgejo","password":"'"${PG_FORGEJO_PASSWORD}"'"},{"name":"infisical","password":"'"${PG_INFISICAL_PASSWORD}"'"},{"name":"litellm","password":"'"${PG_LITELLM_PASSWORD}"'"},{"name":"context_forge","password":"'"${PG_CONTEXT_FORGE_PASSWORD}"'"},{"name":"obot","password":"'"${PG_OBOT_PASSWORD}"'"}]}'
